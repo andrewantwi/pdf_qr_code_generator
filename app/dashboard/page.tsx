@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthProvider";
 import { getToken } from "@/lib/auth";
+import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -19,6 +20,7 @@ interface Doc {
 
 export default function Dashboard() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export default function Dashboard() {
               <span className="text-sm text-slate-500">{user.username}</span>
             )}
             <button
-              onClick={logout}
+              onClick={() => { logout(); toast("Logged out", "info"); }}
               className="text-xs text-slate-400 hover:text-slate-600 underline"
             >
               Logout

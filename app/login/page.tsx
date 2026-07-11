@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/auth";
 import { useAuth } from "@/lib/AuthProvider";
+import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { toast } = useToast();
   
   const { user, loading: authLoading, refreshUser } = useAuth();
   
@@ -40,9 +42,11 @@ export default function LoginPage() {
       
       setToken(data.token);
       await refreshUser();
+      toast("Signed in successfully!", "success");
       router.push("/");
     } catch (err: any) {
       setError(err.message);
+      toast(err.message, "error");
       setBusy(false);
     }
   }

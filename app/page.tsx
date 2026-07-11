@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthProvider";
 import { getToken } from "@/lib/auth";
+import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const POLL_INTERVAL_MS = 4000;
@@ -33,6 +34,7 @@ const STEP_LABELS: Record<number, string> = {
 
 export default function Home() {
   const { user, loading: authLoading, logout } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
 
   const [file, setFile] = useState<File | null>(null);
@@ -68,10 +70,12 @@ export default function Home() {
           setProgress(100);
           setResult(data);
           setLoading(false);
+          toast("QR code generated successfully!", "success");
           return;
         }
         if (data.status === "failed") {
           setError(data.error_message || "Publishing failed. Please try again.");
+          toast(data.error_message || "Publishing failed.", "error");
           setLoading(false);
           return;
         }
@@ -112,9 +116,11 @@ export default function Home() {
       }
 
       const data = await res.json();
+      toast("PDF upload started! Generating QR code…", "info");
       pollStatus(data.id);
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
+      toast(err.message || "Upload failed.", "error");
       setLoading(false);
     }
   }
@@ -123,6 +129,7 @@ export default function Home() {
     if (!result?.pdf_url) return;
     navigator.clipboard.writeText(result.pdf_url);
     setCopied(true);
+    toast("Link copied!", "success");
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -136,7 +143,7 @@ export default function Home() {
           {user && (
             <div className="flex items-center gap-3">
               <span className="text-sm text-slate-500">{user.username}</span>
-              <button onClick={logout} className="text-xs text-slate-400 hover:text-slate-600 underline">
+              <button onClick={() => { logout(); toast("Logged out", "info"); }} className="text-xs text-slate-400 hover:text-slate-600 underline">
                 Logout
               </button>
             </div>

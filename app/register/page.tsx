@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { getToken, setToken } from "@/lib/auth";
+import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,9 +29,11 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed");
       setToken(data.token);
+      toast("Account created successfully!", "success");
       router.push("/");
     } catch (err: any) {
       setError(err.message);
+      toast(err.message, "error");
     } finally {
       setBusy(false);
     }
