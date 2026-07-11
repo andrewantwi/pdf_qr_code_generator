@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthProvider";
-import { getToken } from "@/lib/auth";
+import { getToken, clearToken } from "@/lib/auth";
 import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const redirected = useRef(false);
 
   useEffect(() => {
@@ -56,7 +58,8 @@ export default function Dashboard() {
 
   async function handleDelete() {
     if (!confirmDelete) return;
-    setDeleting(confirmDelete);
+    const id = confirmDelete;
+    setDeleting(id);
     setConfirmDelete(null);
     try {
       const res = await fetch(`${API_URL}/documents/${id}`, {
@@ -65,12 +68,31 @@ export default function Dashboard() {
       });
       if (res.status === 401) { logout(); router.push("/login"); return; }
       if (!res.ok) throw new Error("Failed to delete");
-      setDocs((prev) => prev.filter((d) => d.id !== confirmDelete!));
+      setDocs((prev) => prev.filter((d) => d.id !== id));
       toast("Document deleted", "success");
     } catch (err: any) {
       toast(err.message || "Delete failed", "error");
     } finally {
       setDeleting(null);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    setDeletingAccount(true);
+    setConfirmDeleteAccount(false);
+    try {
+      const res = await fetch(`${API_URL}/auth/account`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (!res.ok) throw new Error("Failed to delete account");
+      clearToken();
+      toast("Account deleted", "success");
+      router.push("/register");
+    } catch (err: any) {
+      toast(err.message || "Delete failed", "error");
+    } finally {
+      setDeletingAccount(false);
     }
   }
 
@@ -137,6 +159,16 @@ export default function Dashboard() {
             </li>
           ))}
         </ul>
+
+        <div className="mt-10 pt-6 border-t border-slate-200">
+          <button
+            onClick={() => setConfirmDeleteAccount(true)}
+            disabled={deletingAccount}
+            className="text-xs text-red-400 hover:text-red-600 underline disabled:opacity-40"
+          >
+            {deletingAccount ? "Deleting account…" : "Delete account"}
+          </button>
+        </div>
       </div>
       {confirmDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -155,6 +187,28 @@ export default function Dashboard() {
                 className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
               >
                 Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirmDeleteAccount && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full mx-4">
+            <p className="text-sm text-slate-900 font-medium mb-2">Delete account?</p>
+            <p className="text-xs text-slate-500 mb-5">All documents will be permanently deleted. This cannot be undone.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDeleteAccount(false)}
+                className="px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+              >
+                Delete account
               </button>
             </div>
           </div>
