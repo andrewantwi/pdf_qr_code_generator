@@ -174,11 +174,11 @@ export default function Home() {
                 ? "border-brand-500 bg-brand-50 dark:bg-brand-900/40"
                 : file
                   ? "border-brand-300 bg-brand-50/50 dark:bg-brand-900/30"
-                  : "border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/50"
+                  : "border-slate-300 dark:border-brand-600 hover:border-slate-400 dark:hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-brand-600/50"
             }`}
           >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-[background-color] duration-200 ease-out-quart ${
-              file ? "bg-brand-100" : "bg-slate-100 dark:bg-slate-700"
+              file ? "bg-brand-100" : "bg-slate-100 dark:bg-brand-700"
             }`}>
               <svg className={`w-5 h-5 ${file ? "text-brand-600" : "text-slate-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
@@ -221,7 +221,7 @@ export default function Home() {
 
           {loading && (
             <div className="mt-6 space-y-2 animate-fade-in">
-              <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-slate-100 dark:bg-brand-700 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-[width] duration-700 ease-out-quint"
                   style={{
@@ -245,7 +245,7 @@ export default function Home() {
         </div>
 
         {result?.qr_code_base64 && (
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-sm mt-4 text-center animate-slide-up-fast">
+          <div className="bg-white dark:bg-brand-800 border border-slate-200 dark:border-brand-700 rounded-xl p-6 shadow-sm mt-4 text-center animate-slide-up-fast">
             <img
               src={`data:image/png;base64,${result.qr_code_base64}`}
               alt="QR code"
@@ -255,14 +255,14 @@ export default function Home() {
             <div className="flex gap-2 mt-4">
               <button
                 onClick={handleCopy}
-                className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
+                className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 {copied ? "Copied!" : "Copy Link"}
               </button>
               <a
                 href={`data:image/png;base64,${result.qr_code_base64}`}
                 download={`${result.filename}-qr.png`}
-                className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
+                className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
               >
                 Download QR
               </a>

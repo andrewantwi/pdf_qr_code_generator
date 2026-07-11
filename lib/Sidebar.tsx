@@ -52,7 +52,7 @@ export default function Sidebar() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed top-3 left-3 z-30 w-8 h-8 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-[background-color] duration-150 ease-out-quart"
+        className="fixed top-3 left-3 z-30 w-8 h-8 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-brand-700 transition-[background-color] duration-150 ease-out-quart"
         aria-label="Open menu"
       >
         <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -68,11 +68,11 @@ export default function Sidebar() {
       )}
 
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-56 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-transform duration-250 ease-out-quart md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-56 bg-white dark:bg-brand-800 border-r border-slate-200 dark:border-brand-700 flex flex-col transition-transform duration-250 ease-out-quart md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-4 h-14 border-b border-slate-100 dark:border-slate-700">
+        <div className="flex items-center justify-between px-4 h-14 border-b border-slate-100 dark:border-brand-700">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center group-hover:bg-brand-700 transition-[background-color] duration-150 ease-out-quart">
               <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -83,7 +83,7 @@ export default function Sidebar() {
           </Link>
           <button
             onClick={() => setOpen(false)}
-            className="w-7 h-7 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-[background-color] duration-150 ease-out-quart"
+            className="w-7 h-7 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-brand-700 transition-[background-color] duration-150 ease-out-quart"
             aria-label="Close menu"
           >
             <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -102,7 +102,7 @@ export default function Sidebar() {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-[background-color,color] duration-150 ease-out-quart ${
                   active
                     ? "bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200"
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200"
                 }`}
               >
                 <NavIcon icon={link.icon} active={active} />
@@ -112,10 +112,10 @@ export default function Sidebar() {
           })}
         </nav>
 
-        <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-700 space-y-1">
+        <div className="px-3 py-3 border-t border-slate-100 dark:border-brand-700 space-y-1">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
           >
             {theme === "dark" ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -130,7 +130,7 @@ export default function Sidebar() {
           </button>
         </div>
 
-        <div className="px-3 py-3 border-t border-slate-100 dark:border-slate-700">
+        <div className="px-3 py-3 border-t border-slate-100 dark:border-brand-700">
           {user ? (
             <div className="space-y-1">
               <div className="px-3 py-2">
@@ -150,7 +150,7 @@ export default function Sidebar() {
             <div className="space-y-1">
               <Link
                 href="/login"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
               >
                 <svg className="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

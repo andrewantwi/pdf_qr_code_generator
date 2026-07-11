@@ -25,7 +25,7 @@ function statusBadgeColor(status: string) {
     case "live": return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
     case "processing": return "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
     case "failed": return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800";
-    default: return "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600";
+    default: return "bg-slate-100 dark:bg-brand-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-brand-600";
   }
 }
 
@@ -93,9 +93,9 @@ export default function DocumentDetailPage() {
 
         {loading ? (
           <div className="card p-6 animate-pulse space-y-4">
-            <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
-            <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-1/3" />
-            <div className="h-48 bg-slate-100 dark:bg-slate-700 rounded-xl" />
+            <div className="h-5 bg-slate-200 dark:bg-brand-700 rounded w-1/2" />
+            <div className="h-3 bg-slate-100 dark:bg-brand-700 rounded w-1/3" />
+            <div className="h-48 bg-slate-100 dark:bg-brand-700 rounded-xl" />
           </div>
         ) : !doc ? (
           <div className="card p-12 text-center">
@@ -144,7 +144,7 @@ export default function DocumentDetailPage() {
 
               {doc.qr_code_base64 && (
                 <div className="text-center">
-                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 inline-block mb-4">
+                  <div className="bg-white dark:bg-brand-800 border border-slate-200 dark:border-brand-700 rounded-xl p-4 inline-block mb-4">
                     <img
                       src={`data:image/png;base64,${doc.qr_code_base64}`}
                       alt="QR code"
@@ -158,13 +158,13 @@ export default function DocumentDetailPage() {
             {doc.pdf_url && (
               <div className="card p-5 animate-slide-up" style={{ animationDelay: "50ms" }}>
                 <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Document URL</h2>
-                <p className="text-sm text-slate-700 dark:text-slate-300 break-all bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-700 mb-3">
+                <p className="text-sm text-slate-700 dark:text-slate-300 break-all bg-slate-50 dark:bg-brand-700/50 rounded-lg p-3 border border-slate-100 dark:border-brand-700 mb-3">
                   {doc.pdf_url}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleCopy}
-                    className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
+                    className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
                   >
                     {copied ? "Copied!" : "Copy Link"}
                   </button>
@@ -172,7 +172,7 @@ export default function DocumentDetailPage() {
                     href={doc.pdf_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
+                    className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
                   >
                     Open PDF
                   </a>
