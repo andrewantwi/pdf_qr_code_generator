@@ -226,7 +226,7 @@ export default function Home() {
                   className="h-full rounded-full transition-[width] duration-700 ease-out-quint"
                   style={{
                     width: `${Math.max(progress, 2)}%`,
-                    background: "linear-gradient(90deg, #6366f1, #818cf8, #6366f1)",
+                    background: "linear-gradient(90deg, #0077b6, #00b4d8, #0077b6)",
                     backgroundSize: "200% 100%",
                   }}
                 />
