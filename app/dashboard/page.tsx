@@ -144,11 +144,11 @@ export default function Dashboard() {
             {docs.map((doc, i) => (
               <div
                 key={doc.id}
-                className="card p-4 flex items-center justify-between animate-slide-up"
+                className="card p-4 flex items-center justify-between animate-slide-up hover:border-brand-200 transition-[border-color] duration-150 ease-out-quart"
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <div className="min-w-0 mr-4">
-                  <p className="text-sm font-medium text-slate-900 truncate">{doc.filename}</p>
+                <Link href={`/documents/${doc.id}`} className="min-w-0 mr-4 flex-1 group">
+                  <p className="text-sm font-medium text-slate-900 truncate group-hover:text-brand-600 transition-[color] duration-150 ease-out-quart">{doc.filename}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statusColor(doc.status)}`}>
                       {doc.status}
@@ -157,7 +157,7 @@ export default function Dashboard() {
                       {new Date(doc.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                </div>
+                </Link>
                 <div className="flex items-center gap-2 shrink-0">
                   {doc.pdf_url && (
                     <a
@@ -166,6 +166,7 @@ export default function Dashboard() {
                       rel="noopener noreferrer"
                       className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.93] select-none"
                       title="Open PDF"
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
