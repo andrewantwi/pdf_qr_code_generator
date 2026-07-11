@@ -67,7 +67,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="card p-6 space-y-4">
           <div>
-            <label htmlFor="username" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Username</label>
+            <label htmlFor="username" className="text-xs font-medium text-slate-500 dark:text-brand-200 mb-1.5 block">Username</label>
             <input
               id="username"
               type="text"
@@ -80,7 +80,7 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Password</label>
+            <label htmlFor="password" className="text-xs font-medium text-slate-500 dark:text-brand-200 mb-1.5 block">Password</label>
             <input
               id="password"
               type="password"
@@ -111,7 +111,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center mt-6">
-          <Link href="/register" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+          <Link href="/register" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-50 transition-colors">
             Don&apos;t have an account? Create one →
           </Link>
         </p>

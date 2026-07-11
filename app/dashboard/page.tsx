@@ -23,7 +23,7 @@ function statusColor(status: string) {
     case "live": return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300";
     case "processing": return "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300";
     case "failed": return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300";
-    default: return "bg-slate-100 dark:bg-brand-700 text-slate-600 dark:text-slate-300";
+    default: return "bg-slate-100 dark:bg-brand-700 text-slate-600 dark:text-brand-100";
   }
 }
 

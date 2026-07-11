@@ -184,7 +184,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
             </div>
-            <span className="text-sm text-slate-600 dark:text-slate-300 text-center font-medium">
+            <span className="text-sm text-slate-600 dark:text-brand-100 text-center font-medium">
               {file ? file.name : "Choose a PDF or drag it here"}
             </span>
             {file && (
@@ -226,7 +226,7 @@ export default function Home() {
                   className="h-full rounded-full transition-[width] duration-700 ease-out-quint"
                   style={{
                     width: `${Math.max(progress, 2)}%`,
-                    background: "linear-gradient(90deg, #0077b6, #00b4d8, #0077b6)",
+                    background: "linear-gradient(90deg, #586d81, #7c92a6, #586d81)",
                     backgroundSize: "200% 100%",
                   }}
                 />
@@ -251,7 +251,7 @@ export default function Home() {
               alt="QR code"
               className="mx-auto w-48 h-48"
             />
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-4 break-all">{result.pdf_url}</p>
+            <p className="text-sm text-slate-500 dark:text-brand-200 mt-4 break-all">{result.pdf_url}</p>
             <div className="flex gap-2 mt-4">
               <button
                 onClick={handleCopy}
@@ -271,7 +271,7 @@ export default function Home() {
         )}
 
         <p className="text-center mt-6 animate-fade-in">
-          <Link href="/dashboard" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
+          <Link href="/dashboard" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-50 transition-colors">
             View past documents &nbsp;→
           </Link>
         </p>

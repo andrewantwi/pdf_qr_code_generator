@@ -13,7 +13,7 @@ const navLinks = [
 ];
 
 function NavIcon({ icon, active }: { icon: string; active: boolean }) {
-  const cls = active ? "text-brand-600 dark:text-brand-400" : "text-slate-400 dark:text-slate-500";
+  const cls = active ? "text-brand-600 dark:text-brand-100" : "text-slate-400 dark:text-brand-100";
   if (icon === "upload") {
     return (
       <svg className={`w-5 h-5 ${cls}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -55,7 +55,7 @@ export default function Sidebar() {
         className="fixed top-3 left-3 z-30 w-8 h-8 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-brand-700 transition-[background-color] duration-150 ease-out-quart"
         aria-label="Open menu"
       >
-        <svg className="w-5 h-5 text-slate-600 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <svg className="w-5 h-5 text-slate-600 dark:text-brand-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
         </svg>
       </button>
@@ -86,7 +86,7 @@ export default function Sidebar() {
             className="w-7 h-7 flex md:hidden items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-brand-700 transition-[background-color] duration-150 ease-out-quart"
             aria-label="Close menu"
           >
-            <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-4 h-4 text-slate-500 dark:text-brand-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -101,8 +101,8 @@ export default function Sidebar() {
                 href={link.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-[background-color,color] duration-150 ease-out-quart ${
                   active
-                    ? "bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
-                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200"
+                    ? "bg-brand-50 dark:bg-brand-900/40 text-brand-700 dark:text-brand-100"
+                    : "text-slate-600 dark:text-brand-200 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <NavIcon icon={link.icon} active={active} />
@@ -115,7 +115,7 @@ export default function Sidebar() {
         <div className="px-3 py-3 border-t border-slate-100 dark:border-brand-700 space-y-1">
           <button
             onClick={toggleTheme}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-brand-200 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-white transition-[background-color,color] duration-150 ease-out-quart"
           >
             {theme === "dark" ? (
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -138,7 +138,7 @@ export default function Sidebar() {
               </div>
               <button
                 onClick={() => { logout(); toast("Logged out", "info"); setOpen(false); }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-[background-color,color] duration-150 ease-out-quart"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-brand-200 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-[background-color,color] duration-150 ease-out-quart"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
@@ -150,9 +150,9 @@ export default function Sidebar() {
             <div className="space-y-1">
               <Link
                 href="/login"
-                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-slate-200 transition-[background-color,color] duration-150 ease-out-quart"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-brand-200 hover:bg-slate-100 dark:hover:bg-brand-700/50 hover:text-slate-900 dark:hover:text-white transition-[background-color,color] duration-150 ease-out-quart"
               >
-                <svg className="w-5 h-5 text-slate-400 dark:text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <svg className="w-5 h-5 text-slate-400 dark:text-brand-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                 </svg>
                 Sign in
