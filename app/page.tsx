@@ -33,7 +33,7 @@ const STEP_LABELS: Record<number, string> = {
 };
 
 export default function Home() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -43,8 +43,10 @@ export default function Home() {
   const [result, setResult] = useState<StatusResult | null>(null);
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const pollStart = useRef<number>(0);
   const redirected = useRef(false);
+  const dropRef = useRef<HTMLLabelElement>(null);
 
   useEffect(() => {
     if (!authLoading && !user && !redirected.current) {
@@ -59,7 +61,7 @@ export default function Home() {
       const elapsedMinutes = (Date.now() - pollStart.current) / 60000;
       if (elapsedMinutes > MAX_POLL_MINUTES) {
         setLoading(false);
-        setError("This is taking longer than expected. Check the dashboard in a few minutes - it may still complete.");
+        setError("This is taking longer than expected. Check the dashboard in a few minutes.");
         return;
       }
       try {
@@ -105,7 +107,7 @@ export default function Home() {
       });
 
       if (res.status === 401) {
-        logout();
+        toast("Session expired. Please sign in again.", "error");
         router.push("/login");
         return;
       }
@@ -116,7 +118,7 @@ export default function Home() {
       }
 
       const data = await res.json();
-      toast("PDF upload started! Generating QR code…", "info");
+      toast("PDF uploaded! Generating QR code…", "info");
       pollStatus(data.id);
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
@@ -136,28 +138,53 @@ export default function Home() {
   if (authLoading) return null;
 
   return (
-    <main className="min-h-screen bg-slate-50 flex flex-col items-center px-4 py-16">
-      <div className="w-full max-w-md">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-slate-900">PDF → QR Code</h1>
-          {user && (
-            <div className="flex items-center gap-3">
-              <span className="text-sm text-slate-500">{user.username}</span>
-              <button onClick={() => { logout(); toast("Logged out", "info"); }} className="text-xs text-slate-400 hover:text-slate-600 underline">
-                Logout
-              </button>
-            </div>
-          )}
+    <main className="min-h-[calc(100vh-3.5rem)] flex flex-col items-center px-4 py-12 md:py-20 animate-fade-in">
+      <div className="w-full max-w-lg">
+        <div className="text-center mb-8 animate-slide-up">
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+            PDF <span className="text-brand-600">→</span> QR
+          </h1>
+          <p className="text-sm text-slate-400 mt-1.5">
+            Upload a PDF, get a QR code that opens it instantly.
+          </p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+        <div className="card p-6 md:p-8 animate-slide-up">
           <label
+            ref={dropRef}
             htmlFor="pdf-upload"
-            className="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-lg py-10 px-4 cursor-pointer hover:border-slate-400 transition-colors"
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setDragging(false);
+              const f = e.dataTransfer.files[0];
+              if (f && f.type === "application/pdf") setFile(f);
+              else toast("Please drop a PDF file.", "error");
+            }}
+            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-12 px-4 cursor-pointer transition-all duration-200 ${
+              dragging
+                ? "border-brand-500 bg-brand-50"
+                : file
+                  ? "border-brand-300 bg-brand-50/50"
+                  : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+            }`}
           >
-            <span className="text-sm text-slate-600 text-center">
-              {file ? file.name : "Click to choose a PDF, or drag it here"}
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+              file ? "bg-brand-100" : "bg-slate-100"
+            }`}>
+              <svg className={`w-5 h-5 ${file ? "text-brand-600" : "text-slate-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+              </svg>
+            </div>
+            <span className="text-sm text-slate-600 text-center font-medium">
+              {file ? file.name : "Choose a PDF or drag it here"}
             </span>
+            {file && (
+              <span className="text-xs text-slate-400 mt-1">
+                {(file.size / 1024 / 1024).toFixed(1)} MB
+              </span>
+            )}
             <input
               id="pdf-upload"
               type="file"
@@ -170,17 +197,32 @@ export default function Home() {
           <button
             onClick={handleUpload}
             disabled={!file || loading}
-            className="mt-4 w-full bg-slate-900 text-white rounded-lg py-2.5 text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-800 transition-colors"
+            className="btn-primary mt-5"
           >
-            {loading ? "Publishing…" : "Generate QR Code"}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Publishing…
+              </span>
+            ) : (
+              "Generate QR Code"
+            )}
           </button>
 
           {loading && (
-            <div className="mt-4 space-y-2">
-              <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+            <div className="mt-6 space-y-2 animate-fade-in">
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="bg-slate-900 h-2.5 rounded-full transition-all duration-700 ease-out"
-                  style={{ width: `${Math.max(progress, 2)}%` }}
+                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${Math.max(progress, 2)}%`,
+                    background: "linear-gradient(90deg, #6366f1, #818cf8, #6366f1)",
+                    backgroundSize: "200% 100%",
+                    animation: progress < 100 ? "shimmer 2s infinite linear" : "none",
+                  }}
                 />
               </div>
               <p className="text-xs text-slate-400 text-center">
@@ -189,38 +231,49 @@ export default function Home() {
             </div>
           )}
 
-          {error && <p className="mt-3 text-sm text-red-600 text-center">{error}</p>}
+          {error && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-xl animate-fade-in">
+              <p className="text-xs text-red-600 text-center">{error}</p>
+            </div>
+          )}
         </div>
 
         {result?.qr_code_base64 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mt-4 text-center">
-            <img
-              src={`data:image/png;base64,${result.qr_code_base64}`}
-              alt="QR code"
-              className="mx-auto w-48 h-48"
-            />
-            <p className="text-sm text-slate-500 mt-4 break-all">{result.pdf_url}</p>
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={handleCopy}
-                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors"
-              >
+          <div className="card-glass p-6 md:p-8 mt-5 text-center animate-scale-in">
+            <div className="bg-white rounded-xl p-4 inline-block shadow-sm">
+              <img
+                src={`data:image/png;base64,${result.qr_code_base64}`}
+                alt="QR code"
+                className="w-44 h-44 mx-auto"
+              />
+            </div>
+            <p className="text-xs text-slate-400 mt-4 break-all font-mono truncate">
+              {result.pdf_url}
+            </p>
+            <div className="flex gap-3 mt-5">
+              <button onClick={handleCopy} className="btn-secondary flex items-center justify-center gap-1.5">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                </svg>
                 {copied ? "Copied!" : "Copy Link"}
               </button>
               <a
                 href={`data:image/png;base64,${result.qr_code_base64}`}
                 download={`${result.filename}-qr.png`}
-                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="btn-primary inline-flex items-center justify-center gap-1.5"
               >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                </svg>
                 Download QR
               </a>
             </div>
           </div>
         )}
 
-        <p className="text-center mt-6">
-          <Link href="/dashboard" className="text-sm text-slate-400 hover:text-slate-600">
-            View past documents →
+        <p className="text-center mt-6 animate-fade-in">
+          <Link href="/dashboard" className="text-xs text-slate-400 hover:text-brand-600 transition-colors">
+            View past documents &nbsp;→
           </Link>
         </p>
       </div>
