@@ -25,6 +25,7 @@ export default function Dashboard() {
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const redirected = useRef(false);
 
   useEffect(() => {
@@ -49,9 +50,14 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, [user, logout, router]);
 
-  async function handleDelete(id: string) {
-    if (!confirm("Delete this document? This cannot be undone.")) return;
-    setDeleting(id);
+  function handleConfirmDelete(id: string) {
+    setConfirmDelete(id);
+  }
+
+  async function handleDelete() {
+    if (!confirmDelete) return;
+    setDeleting(confirmDelete);
+    setConfirmDelete(null);
     try {
       const res = await fetch(`${API_URL}/documents/${id}`, {
         method: "DELETE",
@@ -59,7 +65,7 @@ export default function Dashboard() {
       });
       if (res.status === 401) { logout(); router.push("/login"); return; }
       if (!res.ok) throw new Error("Failed to delete");
-      setDocs((prev) => prev.filter((d) => d.id !== id));
+      setDocs((prev) => prev.filter((d) => d.id !== confirmDelete!));
       toast("Document deleted", "success");
     } catch (err: any) {
       toast(err.message || "Delete failed", "error");
@@ -121,7 +127,7 @@ export default function Dashboard() {
                   </a>
                 )}
                 <button
-                  onClick={() => handleDelete(doc.id)}
+                  onClick={() => handleConfirmDelete(doc.id)}
                   disabled={deleting === doc.id}
                   className="text-sm text-red-500 hover:text-red-700 disabled:opacity-40"
                 >
@@ -132,6 +138,28 @@ export default function Dashboard() {
           ))}
         </ul>
       </div>
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl p-6 shadow-lg max-w-sm w-full mx-4">
+            <p className="text-sm text-slate-900 font-medium mb-2">Delete document?</p>
+            <p className="text-xs text-slate-500 mb-5">This cannot be undone.</p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="px-4 py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 text-sm text-white bg-red-600 rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
