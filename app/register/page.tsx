@@ -43,7 +43,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 animate-fade-in">
+    <main className="min-h-screen flex items-center justify-center px-4 animate-fade-in">
       <div className="w-full max-w-sm animate-slide-up">
         <div className="text-center mb-8">
           <div className="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center mx-auto mb-4">

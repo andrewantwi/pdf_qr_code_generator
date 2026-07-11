@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "@/lib/AuthProvider";
 import { ToastProvider } from "@/lib/Toast";
-import Navbar from "@/lib/Navbar";
+import Sidebar from "@/lib/Sidebar";
 
 export const metadata: Metadata = {
   title: "PDFtoQR — Turn PDFs into QR codes",
@@ -19,8 +19,10 @@ export default function RootLayout({
       <body className="bg-slate-50 text-slate-900">
         <AuthProvider>
           <ToastProvider>
-            <Navbar />
-            {children}
+            <Sidebar />
+            <div className="md:ml-56 min-h-screen">
+              {children}
+            </div>
           </ToastProvider>
         </AuthProvider>
       </body>

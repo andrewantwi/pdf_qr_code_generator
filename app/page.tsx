@@ -145,7 +145,7 @@ export default function Home() {
   if (authLoading) return null;
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] flex flex-col items-center px-4 py-12 md:py-20 animate-fade-in">
+    <main className="min-h-screen flex flex-col items-center px-4 py-12 md:py-20 animate-fade-in">
       <div className="w-full max-w-lg">
         <div className="text-center mb-8 animate-slide-up">
           <h1 className="text-2xl md:text-3xl font-bold text-slate-900">

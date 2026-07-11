@@ -108,7 +108,7 @@ export default function Dashboard() {
   if (authLoading) return null;
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] px-4 py-10 md:py-16 animate-fade-in">
+    <main className="min-h-screen px-4 py-10 md:py-16 animate-fade-in">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

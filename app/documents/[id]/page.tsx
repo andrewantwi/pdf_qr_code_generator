@@ -79,7 +79,7 @@ export default function DocumentDetailPage() {
   if (authLoading) return null;
 
   return (
-    <main className="min-h-[calc(100vh-3.5rem)] px-4 py-10 md:py-16 animate-fade-in">
+    <main className="min-h-screen px-4 py-10 md:py-16 animate-fade-in">
       <div className="max-w-lg mx-auto">
         <Link
           href="/dashboard"
