@@ -23,11 +23,11 @@ interface StatusResult {
 
 const STEP_LABELS: Record<number, string> = {
   0: "Starting…",
-  5: "Creating GitHub repository…",
-  20: "Configuring repository…",
+  5: "Preparing upload…",
+  20: "Configuring storage…",
   35: "Uploading PDF…",
-  50: "Enabling GitHub Pages…",
-  65: "Waiting for Pages build (this takes the longest)…",
+  50: "Publishing document…",
+  65: "Waiting for deployment (this takes the longest)…",
   99: "Finalising…",
   100: "Live!",
 };
