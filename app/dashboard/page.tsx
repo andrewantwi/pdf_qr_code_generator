@@ -24,6 +24,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const redirected = useRef(false);
 
   useEffect(() => {
@@ -47,6 +48,25 @@ export default function Dashboard() {
       })
       .finally(() => setLoading(false));
   }, [user, logout, router]);
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this document? This cannot be undone.")) return;
+    setDeleting(id);
+    try {
+      const res = await fetch(`${API_URL}/documents/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+      if (res.status === 401) { logout(); router.push("/login"); return; }
+      if (!res.ok) throw new Error("Failed to delete");
+      setDocs((prev) => prev.filter((d) => d.id !== id));
+      toast("Document deleted", "success");
+    } catch (err: any) {
+      toast(err.message || "Delete failed", "error");
+    } finally {
+      setDeleting(null);
+    }
+  }
 
   if (authLoading) return null;
 
@@ -89,16 +109,25 @@ export default function Dashboard() {
                   {doc.status} · {new Date(doc.created_at).toLocaleString()}
                 </p>
               </div>
-              {doc.pdf_url && (
-                <a
-                  href={doc.pdf_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-slate-500 hover:text-slate-800 underline"
+              <div className="flex items-center gap-3">
+                {doc.pdf_url && (
+                  <a
+                    href={doc.pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-slate-500 hover:text-slate-800 underline"
+                  >
+                    View
+                  </a>
+                )}
+                <button
+                  onClick={() => handleDelete(doc.id)}
+                  disabled={deleting === doc.id}
+                  className="text-sm text-red-500 hover:text-red-700 disabled:opacity-40"
                 >
-                  View
-                </a>
-              )}
+                  {deleting === doc.id ? "Deleting…" : "Delete"}
+                </button>
+              </div>
             </li>
           ))}
         </ul>
