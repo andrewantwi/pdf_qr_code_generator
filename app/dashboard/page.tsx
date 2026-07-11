@@ -20,10 +20,10 @@ interface Doc {
 
 function statusColor(status: string) {
   switch (status) {
-    case "live": return "bg-emerald-100 text-emerald-700";
-    case "processing": return "bg-amber-100 text-amber-700";
-    case "failed": return "bg-red-100 text-red-700";
-    default: return "bg-slate-100 text-slate-600";
+    case "live": return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300";
+    case "processing": return "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300";
+    case "failed": return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300";
+    default: return "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300";
   }
 }
 
@@ -112,7 +112,7 @@ export default function Dashboard() {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Documents</h1>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Documents</h1>
             <p className="text-xs text-slate-400 mt-0.5">All your uploaded PDFs and their QR codes.</p>
           </div>
         </div>
@@ -121,19 +121,19 @@ export default function Dashboard() {
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card p-5 animate-pulse">
-                <div className="h-4 bg-slate-200 rounded w-1/3 mb-2" />
-                <div className="h-3 bg-slate-100 rounded w-1/4" />
+                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3 mb-2" />
+                <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-1/4" />
               </div>
             ))}
           </div>
         ) : docs.length === 0 ? (
           <div className="card p-12 text-center animate-fade-in">
-            <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center mx-auto mb-4">
               <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
               </svg>
             </div>
-            <p className="text-sm font-medium text-slate-900">No documents yet</p>
+            <p className="text-sm font-medium text-slate-900 dark:text-slate-100">No documents yet</p>
             <p className="text-xs text-slate-400 mt-1 mb-5">Upload your first PDF to get started.</p>
             <Link href="/" className="text-sm font-medium text-brand-600 hover:text-brand-700 transition-colors">
               Upload a PDF →

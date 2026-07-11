@@ -51,13 +51,13 @@ export default function RegisterPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="text-xl font-bold text-slate-900">Create your account</h1>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Create your account</h1>
           <p className="text-sm text-slate-400 mt-1">Start turning PDFs into QR codes.</p>
         </div>
 
         <form onSubmit={handleRegister} className="card p-6 space-y-4">
           <div>
-            <label htmlFor="username" className="text-xs font-medium text-slate-500 mb-1.5 block">Username</label>
+            <label htmlFor="username" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Username</label>
             <input
               id="username"
               type="text"
@@ -70,7 +70,7 @@ export default function RegisterPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="text-xs font-medium text-slate-500 mb-1.5 block">Password</label>
+            <label htmlFor="password" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Password</label>
             <input
               id="password"
               type="password"
@@ -84,8 +84,8 @@ export default function RegisterPage() {
             />
           </div>
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl animate-shake">
-              <p className="text-xs text-red-600 text-center">{error}</p>
+            <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl animate-shake">
+              <p className="text-xs text-red-600 dark:text-red-400 text-center">{error}</p>
             </div>
           )}
           <button type="submit" disabled={busy} className="btn-primary">
@@ -102,7 +102,7 @@ export default function RegisterPage() {
         </form>
 
         <p className="text-center mt-6">
-          <Link href="/login" className="text-xs text-slate-400 hover:text-brand-600 transition-colors">
+          <Link href="/login" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
             Already have an account? Sign in →
           </Link>
         </p>

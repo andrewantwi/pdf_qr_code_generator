@@ -22,10 +22,10 @@ interface DocDetail {
 
 function statusBadgeColor(status: string) {
   switch (status) {
-    case "live": return "bg-emerald-100 text-emerald-700 border-emerald-200";
-    case "processing": return "bg-amber-100 text-amber-700 border-amber-200";
-    case "failed": return "bg-red-100 text-red-700 border-red-200";
-    default: return "bg-slate-100 text-slate-600 border-slate-200";
+    case "live": return "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800";
+    case "processing": return "bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800";
+    case "failed": return "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800";
+    default: return "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600";
   }
 }
 
@@ -83,7 +83,7 @@ export default function DocumentDetailPage() {
       <div className="max-w-lg mx-auto">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-brand-600 transition-[color] duration-150 ease-out-quart mb-6"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 transition-[color] duration-150 ease-out-quart mb-6"
         >
           <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -93,14 +93,14 @@ export default function DocumentDetailPage() {
 
         {loading ? (
           <div className="card p-6 animate-pulse space-y-4">
-            <div className="h-5 bg-slate-200 rounded w-1/2" />
-            <div className="h-3 bg-slate-100 rounded w-1/3" />
-            <div className="h-48 bg-slate-100 rounded-xl" />
+            <div className="h-5 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
+            <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded w-1/3" />
+            <div className="h-48 bg-slate-100 dark:bg-slate-700 rounded-xl" />
           </div>
         ) : !doc ? (
           <div className="card p-12 text-center">
-            <p className="text-sm text-slate-500">Document not found.</p>
-            <Link href="/dashboard" className="text-sm font-medium text-brand-600 hover:text-brand-700 mt-2 inline-block">
+            <p className="text-sm text-slate-500 dark:text-slate-400">Document not found.</p>
+            <Link href="/dashboard" className="text-sm font-medium text-brand-600 hover:text-brand-700 dark:hover:text-brand-500 mt-2 inline-block">
               Go to dashboard
             </Link>
           </div>
@@ -109,7 +109,7 @@ export default function DocumentDetailPage() {
             <div className="card p-6 animate-slide-up">
               <div className="flex items-start justify-between mb-4">
                 <div className="min-w-0 mr-4">
-                  <h1 className="text-lg font-bold text-slate-900 truncate">{doc.filename}</h1>
+                  <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 truncate">{doc.filename}</h1>
                   <div className="flex items-center gap-2 mt-1.5">
                     <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusBadgeColor(doc.status)}`}>
                       {doc.status}
@@ -124,27 +124,27 @@ export default function DocumentDetailPage() {
               </div>
 
               {doc.status === "failed" && doc.error_message && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl mb-4">
-                  <p className="text-xs text-red-600">{doc.error_message}</p>
+                <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl mb-4">
+                  <p className="text-xs text-red-600 dark:text-red-400">{doc.error_message}</p>
                 </div>
               )}
 
               {doc.status === "processing" && (
                 <div className="p-6 text-center">
-                  <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-5 h-5 text-amber-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center mx-auto mb-3">
+                    <svg className="w-5 h-5 text-amber-600 dark:text-amber-400 animate-spin" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
                   </div>
-                  <p className="text-sm font-medium text-slate-900">Still processing</p>
+                  <p className="text-sm font-medium text-slate-900 dark:text-slate-100">Still processing</p>
                   <p className="text-xs text-slate-400 mt-1">The QR code will appear once processing is complete.</p>
                 </div>
               )}
 
               {doc.qr_code_base64 && (
                 <div className="text-center">
-                  <div className="bg-white border border-slate-200 rounded-xl p-4 inline-block mb-4">
+                  <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4 inline-block mb-4">
                     <img
                       src={`data:image/png;base64,${doc.qr_code_base64}`}
                       alt="QR code"
@@ -157,14 +157,14 @@ export default function DocumentDetailPage() {
 
             {doc.pdf_url && (
               <div className="card p-5 animate-slide-up" style={{ animationDelay: "50ms" }}>
-                <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Document URL</h2>
-                <p className="text-sm text-slate-700 break-all bg-slate-50 rounded-lg p-3 border border-slate-100 mb-3">
+                <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Document URL</h2>
+                <p className="text-sm text-slate-700 dark:text-slate-300 break-all bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3 border border-slate-100 dark:border-slate-700 mb-3">
                   {doc.pdf_url}
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleCopy}
-                    className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
+                    className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
                   >
                     {copied ? "Copied!" : "Copy Link"}
                   </button>
@@ -172,7 +172,7 @@ export default function DocumentDetailPage() {
                     href={doc.pdf_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
+                    className="flex-1 border border-slate-300 dark:border-slate-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
                   >
                     Open PDF
                   </a>
@@ -182,7 +182,7 @@ export default function DocumentDetailPage() {
 
             {doc.qr_code_base64 && (
               <div className="card p-5 animate-slide-up" style={{ animationDelay: "100ms" }}>
-                <h2 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Download QR</h2>
+                <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Download QR</h2>
                 <a
                   href={`data:image/png;base64,${doc.qr_code_base64}`}
                   download={`${doc.filename}-qr.png`}
