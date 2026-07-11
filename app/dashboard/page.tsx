@@ -164,7 +164,7 @@ export default function Dashboard() {
                       href={doc.pdf_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-colors"
+                      className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.93] select-none"
                       title="Open PDF"
                     >
                       <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -175,7 +175,7 @@ export default function Dashboard() {
                   <button
                     onClick={() => handleConfirmDelete(doc.id)}
                     disabled={deleting === doc.id}
-                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 flex items-center justify-center transition-colors disabled:opacity-40"
+                    className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-red-100 flex items-center justify-center transition-[background-color,transform] duration-150 ease-out-quart disabled:opacity-40 active:scale-[0.93] select-none"
                     title="Delete"
                   >
                     <svg className={`w-4 h-4 ${deleting === doc.id ? "text-slate-300" : "text-slate-400 hover:text-red-500"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -189,13 +189,13 @@ export default function Dashboard() {
         )}
 
         <div className="mt-10 pt-6 border-t border-slate-200 flex items-center justify-between">
-          <Link href="/" className="text-xs text-slate-400 hover:text-brand-600 transition-colors">
+          <Link href="/" className="text-xs text-slate-400 hover:text-brand-600 transition-[color] duration-150 ease-out-quart">
             ← New upload
           </Link>
           <button
             onClick={() => setConfirmDeleteAccount(true)}
             disabled={deletingAccount}
-            className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+            className="text-xs text-red-400 hover:text-red-600 transition-[color] duration-150 ease-out-quart disabled:opacity-40 select-none"
           >
             {deletingAccount ? "Deleting account…" : "Delete account"}
           </button>
@@ -215,13 +215,13 @@ export default function Dashboard() {
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 Delete
               </button>
@@ -243,13 +243,13 @@ export default function Dashboard() {
             <div className="flex gap-3">
               <button
                 onClick={() => setConfirmDeleteAccount(false)}
-                className="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteAccount}
-                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors"
+                className="flex-1 py-2.5 text-sm font-medium text-white bg-red-600 rounded-xl hover:bg-red-700 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 Delete account
               </button>

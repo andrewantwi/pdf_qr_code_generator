@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((t) => (
           <div
             key={t.id}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium backdrop-blur-sm border transition-all duration-300
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg text-sm font-medium backdrop-blur-sm border animate-slide-up-fast
               ${t.type === "success" ? "bg-emerald-900/90 text-emerald-50 border-emerald-700/50" : ""}
               ${t.type === "error" ? "bg-red-900/90 text-red-50 border-red-700/50" : ""}
               ${t.type === "info" ? "bg-slate-800/90 text-slate-50 border-slate-700/50" : ""}

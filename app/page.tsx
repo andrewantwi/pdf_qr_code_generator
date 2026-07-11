@@ -45,8 +45,15 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
   const pollStart = useRef<number>(0);
+  const pollTimeout = useRef<ReturnType<typeof setTimeout>>();
   const redirected = useRef(false);
   const dropRef = useRef<HTMLLabelElement>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pollTimeout.current) clearTimeout(pollTimeout.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!authLoading && !user && !redirected.current) {
@@ -81,9 +88,9 @@ export default function Home() {
           setLoading(false);
           return;
         }
-        setTimeout(poll, POLL_INTERVAL_MS);
+        pollTimeout.current = setTimeout(poll, POLL_INTERVAL_MS);
       } catch {
-        setTimeout(poll, POLL_INTERVAL_MS);
+        pollTimeout.current = setTimeout(poll, POLL_INTERVAL_MS);
       }
     };
     poll();
@@ -162,7 +169,7 @@ export default function Home() {
               if (f && f.type === "application/pdf") setFile(f);
               else toast("Please drop a PDF file.", "error");
             }}
-            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-12 px-4 cursor-pointer transition-all duration-200 ${
+            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-12 px-4 cursor-pointer transition-[border-color,background-color] duration-200 ease-out-quart ${
               dragging
                 ? "border-brand-500 bg-brand-50"
                 : file
@@ -170,7 +177,7 @@ export default function Home() {
                   : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-[background-color] duration-200 ease-out-quart ${
               file ? "bg-brand-100" : "bg-slate-100"
             }`}>
               <svg className={`w-5 h-5 ${file ? "text-brand-600" : "text-slate-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -216,12 +223,11 @@ export default function Home() {
             <div className="mt-6 space-y-2 animate-fade-in">
               <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700 ease-out"
+                  className="h-full rounded-full transition-[width] duration-700 ease-out-quint"
                   style={{
                     width: `${Math.max(progress, 2)}%`,
                     background: "linear-gradient(90deg, #6366f1, #818cf8, #6366f1)",
                     backgroundSize: "200% 100%",
-                    animation: progress < 100 ? "shimmer 2s infinite linear" : "none",
                   }}
                 />
               </div>
@@ -239,7 +245,7 @@ export default function Home() {
         </div>
 
         {result?.qr_code_base64 && (
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mt-4 text-center">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm mt-4 text-center animate-slide-up-fast">
             <img
               src={`data:image/png;base64,${result.qr_code_base64}`}
               alt="QR code"
@@ -249,14 +255,14 @@ export default function Home() {
             <div className="flex gap-2 mt-4">
               <button
                 onClick={handleCopy}
-                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
               >
                 {copied ? "Copied!" : "Copy Link"}
               </button>
               <a
                 href={`data:image/png;base64,${result.qr_code_base64}`}
                 download={`${result.filename}-qr.png`}
-                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-colors"
+                className="flex-1 border border-slate-300 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
               >
                 Download QR
               </a>

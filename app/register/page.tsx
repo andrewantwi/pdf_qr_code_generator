@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getToken, setToken } from "@/lib/auth";
+import { setToken } from "@/lib/auth";
+import { useAuth } from "@/lib/AuthProvider";
 import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -11,14 +12,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export default function RegisterPage() {
   const router = useRouter();
   const { toast } = useToast();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    if (getToken()) router.push("/");
-  }, [router]);
+    if (!authLoading && user) router.push("/");
+  }, [authLoading, user, router]);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -29,6 +31,7 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed");
       setToken(data.token);
+      await refreshUser();
       toast("Account created successfully!", "success");
       router.push("/");
     } catch (err: any) {
@@ -81,7 +84,7 @@ export default function RegisterPage() {
             />
           </div>
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+            <div className="p-3 bg-red-50 border border-red-200 rounded-xl animate-shake">
               <p className="text-xs text-red-600 text-center">{error}</p>
             </div>
           )}
