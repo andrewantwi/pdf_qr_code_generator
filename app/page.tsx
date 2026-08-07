@@ -72,7 +72,15 @@ export default function Home() {
         return;
       }
       try {
-        const res = await fetch(`${API_URL}/status/${id}`);
+        const res = await fetch(`${API_URL}/status/${id}`, {
+          headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        if (res.status === 401) {
+          setLoading(false);
+          toast("Session expired. Please sign in again.", "error");
+          router.replace("/login");
+          return;
+        }
         const data: StatusResult = await res.json();
         setProgress(data.progress ?? 0);
         if (data.status === "live") {

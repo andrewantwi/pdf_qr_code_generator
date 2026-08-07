@@ -27,7 +27,11 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/auth/register?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`, { method: "POST" });
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed");
       setToken(data.token);
