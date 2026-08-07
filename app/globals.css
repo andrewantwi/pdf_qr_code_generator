@@ -2,48 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 
 @layer base {
-  body {
+  /* Light: sage palette */
+  :root {
+    --brand-50: 243 241 234;
+    --brand-100: 218 215 205;
+    --brand-200: 197 205 184;
+    --brand-300: 163 177 138;
+    --brand-400: 88 129 87;
+    --brand-500: 58 90 64;
+    --brand-600: 52 78 65;
+    --brand-700: 44 64 54;
+    --brand-800: 36 53 44;
+    --brand-900: 26 39 32;
+    --brand-DEFAULT: 88 129 87;
+
+    --accent: 88 129 87;
+    --accent-fg: 243 241 234;
+    --accent-soft: 229 227 214;
+
+    --canvas: 218 215 205;
+    --surface: 243 241 234;
+    --line: 197 205 184;
+    --ink: 52 78 65;
+    --muted: 58 90 64;
+    --faint: 120 138 110;
+  }
+
+  /* Dark: deep sage neutrals + one sage accent */
+  .dark {
+    --brand-50: 232 230 222;
+    --brand-100: 196 200 186;
+    --brand-200: 140 152 128;
+    --brand-300: 100 118 96;
+    --brand-400: 74 90 72;
+    --brand-500: 52 66 52;
+    --brand-600: 36 48 38;
+    --brand-700: 24 34 28;
+    --brand-800: 14 20 16;
+    --brand-900: 8 12 10;
+    --brand-DEFAULT: 163 177 138;
+
+    --accent: 163 177 138;
+    --accent-fg: 8 12 10;
+    --accent-soft: 20 30 24;
+
+    --canvas: 8 12 10;
+    --surface: 14 20 16;
+    --line: 32 44 36;
+    --ink: 232 230 222;
+    --muted: 140 152 128;
+    --faint: 90 104 88;
+  }
+
+  html {
     @apply antialiased;
   }
-}
 
-@layer base {
-  .dark body {
-    @apply bg-brand-900 text-white;
+  body {
+    font-family: "Outfit", system-ui, sans-serif;
+    color: rgb(var(--ink));
+    background-color: rgb(var(--canvas));
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply w-full bg-brand-600 text-white rounded-xl py-3 px-4 text-sm font-semibold
-           hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed
-           transition-[transform,background-color] duration-150 ease-out-quart
+    @apply w-full inline-flex items-center justify-center rounded-xl py-3 px-4 text-sm font-semibold
+           bg-accent text-accent-fg hover:opacity-90
+           disabled:opacity-40 disabled:cursor-not-allowed
+           transition-[transform,opacity] duration-150 ease-out-quart
            active:scale-[0.97] select-none;
   }
 
   .btn-secondary {
-    @apply flex-1 border border-slate-300 dark:border-brand-600 rounded-xl py-3 text-sm font-medium
-           hover:bg-slate-50 dark:hover:bg-brand-700 transition-[transform,background-color,border-color] duration-150 ease-out-quart
-           text-slate-700 dark:text-brand-100 active:scale-[0.97] select-none;
+    @apply flex-1 border border-line rounded-xl py-3 text-sm font-medium
+           text-ink hover:bg-brand-50 dark:hover:bg-brand-700
+           transition-[transform,background-color,border-color] duration-150 ease-out-quart
+           active:scale-[0.97] select-none;
+  }
+
+  .btn-danger {
+    @apply w-full inline-flex items-center justify-center bg-red-600 text-white rounded-xl py-3 px-4 text-sm font-semibold
+           hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed
+           transition-[transform,background-color] duration-150 ease-out-quart
+           active:scale-[0.97] select-none;
+  }
+
+  .btn-danger-secondary {
+    @apply flex-1 border border-line rounded-xl py-3 text-sm font-medium
+           hover:bg-red-50 dark:hover:bg-red-900/30
+           text-red-600 dark:text-red-400
+           transition-[transform,background-color,border-color] duration-150 ease-out-quart
+           active:scale-[0.97] select-none;
   }
 
   .input-field {
-    @apply w-full border border-slate-300 dark:border-brand-600 rounded-xl px-4 py-3 text-sm
-           bg-white dark:bg-brand-800 text-slate-900 dark:text-white
-           focus:outline-none focus:ring-2 focus:ring-brand-300/20 focus:border-brand-300
+    @apply w-full border border-line rounded-xl px-4 py-3 text-sm
+           bg-surface text-ink
+           focus:outline-none focus:ring-2 focus:ring-accent/25 focus:border-accent
            transition-[border-color,box-shadow] duration-200 ease-out-quart
-           placeholder:text-slate-400 dark:placeholder:text-brand-400;
+           placeholder:text-faint;
   }
 
   .card {
-    @apply bg-white dark:bg-brand-800 border border-slate-200 dark:border-brand-700 rounded-2xl shadow-sm dark:shadow-none;
+    @apply bg-surface border border-line rounded-2xl shadow-sm dark:shadow-none;
   }
 
   .card-glass {
-    @apply bg-white/80 dark:bg-brand-800/80 backdrop-blur-sm border border-slate-200/60 dark:border-brand-700/60 rounded-2xl shadow-sm;
+    @apply bg-surface/90 backdrop-blur-sm border border-line rounded-2xl shadow-sm;
+  }
+
+  .page-shell {
+    @apply min-h-screen flex flex-col items-center px-4 py-12 md:py-20;
+  }
+
+  .text-muted {
+    color: rgb(var(--muted));
+  }
+
+  .text-faint {
+    color: rgb(var(--faint));
   }
 }
 

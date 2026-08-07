@@ -150,21 +150,33 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3 animate-fade-in">
+          <svg className="animate-spin h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm text-faint animate-pulse">Loading…</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-12 md:py-20 animate-fade-in">
+    <main className="page-shell animate-fade-in">
       <div className="w-full max-w-lg">
-        <div className="text-center mb-8 animate-slide-up">
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
-            PDF <span className="text-brand-600">→</span> QR
-          </h1>
-          <p className="text-sm text-slate-400 mt-1.5">
+        <div className="text-center mb-10 animate-slide-up">
+          <p className="text-3xl md:text-4xl font-bold tracking-tight text-ink">
+            PDF<span className="text-accent">to</span>QR
+          </p>
+          <p className="text-sm text-muted mt-2.5">
             Upload a PDF, get a QR code that opens it instantly.
           </p>
         </div>
 
-        <div className="card p-6 md:p-8 animate-slide-up">
+        <div className="card p-8 md:p-10 animate-slide-up">
           <label
             ref={dropRef}
             htmlFor="pdf-upload"
@@ -177,28 +189,30 @@ export default function Home() {
               if (f && f.type === "application/pdf") setFile(f);
               else toast("Please drop a PDF file.", "error");
             }}
-            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl py-12 px-4 cursor-pointer transition-[border-color,background-color] duration-200 ease-out-quart ${
+            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl py-14 px-4 cursor-pointer transition-[border-color,background-color,transform] duration-200 ease-out-quart ${
               dragging
-                ? "border-brand-500 bg-brand-50 dark:bg-brand-900/40"
+                ? "border-accent bg-accent-soft scale-[1.01]"
                 : file
-                  ? "border-brand-300 bg-brand-50/50 dark:bg-brand-900/30"
-                  : "border-slate-300 dark:border-brand-600 hover:border-slate-400 dark:hover:border-brand-500 hover:bg-slate-50 dark:hover:bg-brand-600/50"
+                  ? "border-accent bg-accent-soft/70"
+                  : "border-line hover:border-accent/50 hover:bg-accent-soft/50"
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-[background-color] duration-200 ease-out-quart ${
-              file ? "bg-brand-100" : "bg-slate-100 dark:bg-brand-700"
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-[background-color,transform] duration-200 ease-out-quart ${
+              file ? "bg-accent-soft scale-105" : "bg-accent-soft/80"
             }`}>
-              <svg className={`w-5 h-5 ${file ? "text-brand-600" : "text-slate-400"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className={`w-5 h-5 ${file ? "text-accent" : "text-faint"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
               </svg>
             </div>
-            <span className="text-sm text-slate-600 dark:text-brand-100 text-center font-medium">
+            <span className="text-sm text-ink/80 text-center font-medium">
               {file ? file.name : "Choose a PDF or drag it here"}
             </span>
-            {file && (
-              <span className="text-xs text-slate-400 mt-1">
+            {file ? (
+              <span className="text-xs text-faint mt-1.5">
                 {(file.size / 1024 / 1024).toFixed(1)} MB
               </span>
+            ) : (
+              <span className="text-xs text-faint mt-1.5">PDF only · up to your plan limit</span>
             )}
             <input
               id="pdf-upload"
@@ -212,7 +226,7 @@ export default function Home() {
           <button
             onClick={handleUpload}
             disabled={!file || loading}
-            className="btn-primary mt-5"
+            className="btn-primary mt-6"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -228,18 +242,18 @@ export default function Home() {
           </button>
 
           {loading && (
-            <div className="mt-6 space-y-2 animate-fade-in">
-              <div className="w-full h-2 bg-slate-100 dark:bg-brand-700 rounded-full overflow-hidden">
+            <div className="mt-6 space-y-2.5 animate-fade-in">
+              <div className="w-full h-2 bg-accent-soft rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-[width] duration-700 ease-out-quint"
+                  className="h-full rounded-full transition-[width] duration-700 ease-out-quint animate-progress-shimmer"
                   style={{
                     width: `${Math.max(progress, 2)}%`,
-                    background: "linear-gradient(90deg, #586d81, #7c92a6, #586d81)",
+                    background: "linear-gradient(90deg, rgb(var(--accent)), rgb(var(--muted)), rgb(var(--accent)))",
                     backgroundSize: "200% 100%",
                   }}
                 />
               </div>
-              <p className="text-xs text-slate-400 text-center">
+              <p className="text-xs text-faint text-center">
                 {STEP_LABELS[progress] || `Publishing… ${progress}%`}
               </p>
             </div>
@@ -253,24 +267,23 @@ export default function Home() {
         </div>
 
         {result?.qr_code_base64 && (
-          <div className="bg-white dark:bg-brand-800 border border-slate-200 dark:border-brand-700 rounded-xl p-6 shadow-sm mt-4 text-center animate-slide-up-fast">
-            <img
-              src={`data:image/png;base64,${result.qr_code_base64}`}
-              alt="QR code"
-              className="mx-auto w-48 h-48"
-            />
-            <p className="text-sm text-slate-500 dark:text-brand-200 mt-4 break-all">{result.pdf_url}</p>
-            <div className="flex gap-2 mt-4">
-              <button
-                onClick={handleCopy}
-                className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none"
-              >
+          <div className="card p-6 mt-4 text-center animate-slide-up-fast">
+            <div className="inline-block p-3 bg-surface rounded-xl border border-line shadow-sm">
+              <img
+                src={`data:image/png;base64,${result.qr_code_base64}`}
+                alt="QR code"
+                className="mx-auto w-48 h-48"
+              />
+            </div>
+            <p className="text-sm text-muted mt-4 break-all px-2">{result.pdf_url}</p>
+            <div className="flex gap-2 mt-5">
+              <button onClick={handleCopy} className="btn-secondary">
                 {copied ? "Copied!" : "Copy Link"}
               </button>
               <a
                 href={`data:image/png;base64,${result.qr_code_base64}`}
                 download={`${result.filename}-qr.png`}
-                className="flex-1 border border-slate-300 dark:border-brand-600 rounded-lg py-2 text-sm font-medium hover:bg-slate-50 dark:hover:bg-brand-600/50 transition-[background-color,transform] duration-150 ease-out-quart active:scale-[0.97] select-none inline-block text-center"
+                className="btn-secondary text-center"
               >
                 Download QR
               </a>
@@ -278,9 +291,9 @@ export default function Home() {
           </div>
         )}
 
-        <p className="text-center mt-6 animate-fade-in">
-          <Link href="/dashboard" className="text-xs text-slate-400 hover:text-brand-600 dark:hover:text-brand-50 transition-colors">
-            View past documents &nbsp;→
+        <p className="text-center mt-8 animate-fade-in">
+          <Link href="/dashboard" className="text-xs text-faint hover:text-accent transition-colors">
+            View past documents →
           </Link>
         </p>
       </div>
