@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthProvider";
-import { getToken, clearToken } from "@/lib/auth";
+import { getToken } from "@/lib/auth";
 import { useToast } from "@/lib/Toast";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -35,8 +35,6 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
-  const [deletingAccount, setDeletingAccount] = useState(false);
   const redirected = useRef(false);
 
   useEffect(() => {
@@ -83,25 +81,6 @@ export default function Dashboard() {
       toast(err.message || "Delete failed", "error");
     } finally {
       setDeleting(null);
-    }
-  }
-
-  async function handleDeleteAccount() {
-    setDeletingAccount(true);
-    setConfirmDeleteAccount(false);
-    try {
-      const res = await fetch(`${API_URL}/auth/account`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete account");
-      clearToken();
-      toast("Account deleted", "success");
-      router.push("/register");
-    } catch (err: any) {
-      toast(err.message || "Delete failed", "error");
-    } finally {
-      setDeletingAccount(false);
     }
   }
 
@@ -206,17 +185,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="mt-10 pt-6 border-t border-line flex items-center justify-between">
+        <div className="mt-10 pt-6 border-t border-line">
           <Link href="/" className="text-xs text-faint hover:text-accent transition-[color] duration-150 ease-out-quart">
             ← New upload
           </Link>
-          <button
-            onClick={() => setConfirmDeleteAccount(true)}
-            disabled={deletingAccount}
-            className="text-xs text-red-400 hover:text-red-600 transition-[color] duration-150 ease-out-quart disabled:opacity-40 select-none"
-          >
-            {deletingAccount ? "Deleting account…" : "Delete account"}
-          </button>
         </div>
       </div>
 
@@ -242,34 +214,6 @@ export default function Dashboard() {
                 className="btn-danger"
               >
                 Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {confirmDeleteAccount && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface rounded-2xl p-6 shadow-xl max-w-sm w-full mx-4 animate-scale-in">
-            <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mb-3">
-              <svg className="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-            </div>
-            <p className="text-sm font-semibold text-ink mb-1">Delete account?</p>
-            <p className="text-xs text-muted mb-5">All your documents will be permanently removed. This cannot be undone.</p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setConfirmDeleteAccount(false)}
-                className="btn-danger-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeleteAccount}
-                className="btn-danger"
-              >
-                Delete account
               </button>
             </div>
           </div>
