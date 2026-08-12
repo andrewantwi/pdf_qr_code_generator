@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/AuthProvider";
-import { getToken, clearToken } from "@/lib/auth";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-
 export default function Settings() {
-  const { user, loading: authLoading, refreshUser } = useAuth();
+  const { user, loading: authLoading, refreshUser, logout } = useRequireAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -26,20 +24,21 @@ export default function Settings() {
     if (!username.trim()) return;
     setSaving(true);
     try {
-      const res = await fetch(`${API_URL}/auth/profile`, {
+      await apiRequest("/auth/profile", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ username: username.trim() }),
+        body: { username: username.trim() },
       });
-      if (!res.ok) throw new Error("Failed to update username");
       await refreshUser();
       setEditing(false);
       toast("Profile updated", "success");
     } catch (err: any) {
-      toast(err.message || "Update failed", "error");
+      if (isApiUnauthorized(err)) {
+        logout();
+        router.push("/login");
+        toast("Session expired. Please sign in again.", "error");
+      } else {
+        toast(err.message || "Update failed", "error");
+      }
     } finally {
       setSaving(false);
     }
@@ -57,20 +56,21 @@ export default function Settings() {
     }
     setSavingPassword(true);
     try {
-      const res = await fetch(`${API_URL}/auth/password`, {
+      await apiRequest("/auth/password", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getToken()}`,
-        },
-        body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+        body: { current_password: currentPassword, new_password: newPassword },
       });
-      if (!res.ok) throw new Error("Failed to update password");
       setCurrentPassword("");
       setNewPassword("");
       toast("Password updated", "success");
     } catch (err: any) {
-      toast(err.message || "Update failed", "error");
+      if (isApiUnauthorized(err)) {
+        logout();
+        router.push("/login");
+        toast("Session expired. Please sign in again.", "error");
+      } else {
+        toast(err.message || "Update failed", "error");
+      }
     } finally {
       setSavingPassword(false);
     }
@@ -80,12 +80,8 @@ export default function Settings() {
     setDeletingAccount(true);
     setConfirmDeleteAccount(false);
     try {
-      const res = await fetch(`${API_URL}/auth/account`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (!res.ok) throw new Error("Failed to delete account");
-      clearToken();
+      await apiRequest("/auth/account", { method: "DELETE" });
+      logout();
       toast("Account deleted", "success");
       router.push("/register");
     } catch (err: any) {
@@ -108,6 +104,8 @@ export default function Settings() {
       </main>
     );
   }
+
+  if (!user) return null;
 
   return (
     <main className="min-h-screen px-4 py-12 md:py-16 animate-fade-in">

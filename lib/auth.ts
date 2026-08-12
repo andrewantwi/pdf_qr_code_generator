@@ -5,7 +5,6 @@ const TOKEN_KEY = "pdfqr_token";
 export interface AuthUser {
   id: string;
   username: string;
-  avatar_url: string | null;
 }
 
 export function getToken(): string | null {
@@ -32,10 +31,6 @@ export function clearToken() {
   }
 }
 
-export function isAuthenticated(): boolean {
-  return !!getToken();
-}
-
 export async function fetchUser(): Promise<AuthUser | null> {
   const token = getToken();
   if (!token) return null;
@@ -56,15 +51,4 @@ export async function fetchUser(): Promise<AuthUser | null> {
     clearToken(); 
     return null;
   }
-}
-
-export function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
-  const token = getToken();
-  return fetch(url, {
-    ...options,
-    headers: { 
-      ...options.headers, 
-      Authorization: `Bearer ${token}` 
-    },
-  });
 }

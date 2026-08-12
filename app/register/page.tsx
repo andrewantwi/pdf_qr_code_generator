@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/auth";
 import { useAuth } from "@/lib/AuthProvider";
+import { apiRequest } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -34,13 +33,11 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/auth/register`, {
+      const data = await apiRequest<{ token: string }>("/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: { username, password },
+        auth: false,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Registration failed");
       setToken(data.token);
       await refreshUser();
       toast("Account created successfully!", "success");

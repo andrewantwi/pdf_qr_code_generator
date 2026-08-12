@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/lib/AuthProvider";
-import { getToken } from "@/lib/auth";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const POLL_INTERVAL_MS = 4000;
 
 interface DocDetail {
   id: string;
@@ -30,7 +30,7 @@ function statusBadgeColor(status: string) {
 }
 
 export default function DocumentDetailPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const { toast } = useToast();
   const router = useRouter();
   const params = useParams();
@@ -39,34 +39,42 @@ export default function DocumentDetailPage() {
   const [doc, setDoc] = useState<DocDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const pollTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
-    if (!authLoading && !user) router.replace("/login");
-  }, [authLoading, user, router]);
+    return () => {
+      if (pollTimeout.current) clearTimeout(pollTimeout.current);
+    };
+  }, []);
+
+  const fetchDoc = useCallback(async () => {
+    if (!user || !id) return;
+    try {
+      const data = await apiRequest<DocDetail>(`/status/${id}`);
+      setDoc(data);
+      setLoading(false);
+      if (data.status === "processing") {
+        pollTimeout.current = setTimeout(fetchDoc, POLL_INTERVAL_MS);
+      }
+    } catch (err: any) {
+      if (isApiUnauthorized(err)) {
+        toast("Session expired. Please sign in again.", "error");
+        router.push("/login");
+        return;
+      }
+      toast(err.message || "Failed to load document", "error");
+      setLoading(false);
+    }
+  }, [user, id]);
 
   useEffect(() => {
     if (!user || !id) return;
-
-    fetch(`${API_URL}/status/${id}`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    })
-      .then((res) => {
-        if (res.status === 401) {
-          toast("Session expired. Please sign in again.", "error");
-          router.push("/login");
-          return null;
-        }
-        if (!res.ok) throw new Error("Failed to load document");
-        return res.json();
-      })
-      .then((data) => {
-        if (data) setDoc(data);
-      })
-      .catch((err) => {
-        toast(err.message, "error");
-      })
-      .finally(() => setLoading(false));
-  }, [user, id, router, toast]);
+    setLoading(true);
+    fetchDoc();
+    return () => {
+      if (pollTimeout.current) clearTimeout(pollTimeout.current);
+    };
+  }, [user, id, fetchDoc]);
 
   function handleCopy() {
     if (!doc?.pdf_url) return;
@@ -76,7 +84,21 @@ export default function DocumentDetailPage() {
     setTimeout(() => setCopied(false), 2000);
   }
 
-  if (authLoading) return null;
+  if (authLoading) {
+    return (
+      <main className="min-h-screen flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-3 animate-fade-in">
+          <svg className="animate-spin h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+          <p className="text-sm text-faint animate-pulse">Loading…</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <main className="min-h-screen px-4 py-10 md:py-16 animate-fade-in">

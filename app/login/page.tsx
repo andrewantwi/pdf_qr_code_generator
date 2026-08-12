@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/auth";
 import { useAuth } from "@/lib/AuthProvider";
+import { apiRequest } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -28,13 +27,11 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
+      const data = await apiRequest<{ token: string }>("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: { username, password },
+        auth: false,
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Login failed");
       setToken(data.token);
       await refreshUser();
       toast("Signed in successfully!", "success");

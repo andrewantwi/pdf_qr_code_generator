@@ -3,13 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/lib/AuthProvider";
-import { getToken } from "@/lib/auth";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLL_MINUTES = 11;
+const MAX_CONSECUTIVE_FAILURES = 5;
 
 interface StatusResult {
   id: string;
@@ -33,7 +33,7 @@ const STEP_LABELS: Record<number, string> = {
 };
 
 export default function Home() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useRequireAuth();
   const { toast } = useToast();
   const router = useRouter();
 
@@ -46,8 +46,7 @@ export default function Home() {
   const [dragging, setDragging] = useState(false);
   const pollStart = useRef<number>(0);
   const pollTimeout = useRef<ReturnType<typeof setTimeout>>();
-  const redirected = useRef(false);
-  const dropRef = useRef<HTMLLabelElement>(null);
+  const failureCount = useRef(0);
 
   useEffect(() => {
     return () => {
@@ -55,15 +54,9 @@ export default function Home() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!authLoading && !user && !redirected.current) {
-      redirected.current = true;
-      router.replace("/login");
-    }
-  }, [authLoading, user]);
-
   function pollStatus(id: string) {
     pollStart.current = Date.now();
+    failureCount.current = 0;
     const poll = async () => {
       const elapsedMinutes = (Date.now() - pollStart.current) / 60000;
       if (elapsedMinutes > MAX_POLL_MINUTES) {
@@ -72,16 +65,8 @@ export default function Home() {
         return;
       }
       try {
-        const res = await fetch(`${API_URL}/status/${id}`, {
-          headers: { Authorization: `Bearer ${getToken()}` },
-        });
-        if (res.status === 401) {
-          setLoading(false);
-          toast("Session expired. Please sign in again.", "error");
-          router.replace("/login");
-          return;
-        }
-        const data: StatusResult = await res.json();
+        const data = await apiRequest<StatusResult>(`/status/${id}`);
+        failureCount.current = 0;
         setProgress(data.progress ?? 0);
         if (data.status === "live") {
           setProgress(100);
@@ -97,7 +82,20 @@ export default function Home() {
           return;
         }
         pollTimeout.current = setTimeout(poll, POLL_INTERVAL_MS);
-      } catch {
+      } catch (err: any) {
+        if (isApiUnauthorized(err)) {
+          setLoading(false);
+          toast("Session expired. Please sign in again.", "error");
+          router.replace("/login");
+          return;
+        }
+        failureCount.current += 1;
+        if (failureCount.current >= MAX_CONSECUTIVE_FAILURES) {
+          setLoading(false);
+          setError("Could not reach the server. Check the dashboard in a few minutes.");
+          toast("Could not reach the server.", "error");
+          return;
+        }
         pollTimeout.current = setTimeout(poll, POLL_INTERVAL_MS);
       }
     };
@@ -115,27 +113,18 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      const res = await fetch(`${API_URL}/upload`, {
+      const data = await apiRequest<{ id: string }>("/upload", {
         method: "POST",
-        headers: { Authorization: `Bearer ${getToken()}` },
-        body: formData,
+        formData,
       });
-
-      if (res.status === 401) {
+      toast("PDF uploaded! Generating QR code…", "info");
+      pollStatus(data.id);
+    } catch (err: any) {
+      if (isApiUnauthorized(err)) {
         toast("Session expired. Please sign in again.", "error");
         router.push("/login");
         return;
       }
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        throw new Error(data?.detail || "Upload failed. Please try again.");
-      }
-
-      const data = await res.json();
-      toast("PDF uploaded! Generating QR code…", "info");
-      pollStatus(data.id);
-    } catch (err: any) {
       setError(err.message || "Something went wrong.");
       toast(err.message || "Upload failed.", "error");
       setLoading(false);
@@ -164,6 +153,8 @@ export default function Home() {
     );
   }
 
+  if (!user) return null;
+
   return (
     <main className="page-shell animate-fade-in">
       <div className="w-full max-w-lg">
@@ -178,7 +169,6 @@ export default function Home() {
 
         <div className="card p-8 md:p-10 animate-slide-up">
           <label
-            ref={dropRef}
             htmlFor="pdf-upload"
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}

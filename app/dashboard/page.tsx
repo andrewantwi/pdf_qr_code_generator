@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/lib/AuthProvider";
-import { getToken } from "@/lib/auth";
+import { useRequireAuth } from "@/lib/useRequireAuth";
+import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface Doc {
   id: string;
@@ -28,36 +26,38 @@ function statusColor(status: string) {
 }
 
 export default function Dashboard() {
-  const { user, loading: authLoading, logout } = useAuth();
+  const { user, loading: authLoading, logout } = useRequireAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const redirected = useRef(false);
-
-  useEffect(() => {
-    if (!authLoading && !user && !redirected.current) {
-      redirected.current = true;
-      router.replace("/login");
-    }
-  }, [authLoading, user]);
 
   useEffect(() => {
     if (!user) return;
-    fetch(`${API_URL}/documents`, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    })
-      .then((res) => {
-        if (res.status === 401) { logout(); router.push("/login"); return null; }
-        return res.json();
-      })
+    let cancelled = false;
+    setLoading(true);
+    apiRequest<Doc[]>("/documents")
       .then((data) => {
-        if (data) setDocs(data);
+        if (!cancelled) setDocs(data);
       })
-      .finally(() => setLoading(false));
-  }, [user, logout, router]);
+      .catch((err) => {
+        if (cancelled) return;
+        if (isApiUnauthorized(err)) {
+          logout();
+          router.push("/login");
+        } else {
+          toast("Failed to load documents", "error");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
 
   function handleConfirmDelete(id: string) {
     setConfirmDelete(id);
@@ -69,16 +69,16 @@ export default function Dashboard() {
     setDeleting(id);
     setConfirmDelete(null);
     try {
-      const res = await fetch(`${API_URL}/documents/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${getToken()}` },
-      });
-      if (res.status === 401) { logout(); router.push("/login"); return; }
-      if (!res.ok) throw new Error("Failed to delete");
+      await apiRequest(`/documents/${id}`, { method: "DELETE" });
       setDocs((prev) => prev.filter((d) => d.id !== id));
       toast("Document deleted", "success");
     } catch (err: any) {
-      toast(err.message || "Delete failed", "error");
+      if (isApiUnauthorized(err)) {
+        logout();
+        router.push("/login");
+      } else {
+        toast(err.message || "Delete failed", "error");
+      }
     } finally {
       setDeleting(null);
     }
@@ -97,6 +97,8 @@ export default function Dashboard() {
       </main>
     );
   }
+
+  if (!user) return null;
 
   return (
     <main className="min-h-screen px-4 py-12 md:py-16 animate-fade-in">
