@@ -141,8 +141,9 @@ npm run lint      # ESLint via next lint
 | Route                   | File                          | Purpose                                                            |
 | ----------------------- | ----------------------------- | ------------------------------------------------------------------ |
 | `/`                     | `app/page.tsx`                | **Home** — file picker, upload, live progress bar, and the QR code result once live. Redirects to `/login` when signed out. |
-| `/login`                | `app/login/page.tsx`          | Sign-in form. Redirects to `/` when already authenticated.         |
-| `/register`             | `app/register/page.tsx`       | Account creation form. Redirects to `/` after success.             |
+| `/login`                | `app/login/page.tsx`          | Sign-in form with optional **“Continue with Google”** button (shown when the backend reports `google_enabled`). Handles `?verified=1`, `?google_error`, and OAuth `?token=` redirects. Redirects to `/` when already authenticated. |
+| `/register`             | `app/register/page.tsx`       | Account creation form (**username + email + password**). On success shows a “check your inbox” view with resend — no auto-login until the email is verified. |
+| `/forgot-password`      | `app/forgot-password/page.tsx`| Collects an email and posts to `/auth/forgot-password`; shows a generic confirmation. |
 | `/dashboard`            | `app/dashboard/page.tsx`      | History of the user’s documents (filename, status, QR link), with delete actions and full account deletion. |
 | `/documents/[id]`       | `app/documents/[id]/page.tsx` | Per-document detail: status badge, progress, live PDF link, QR code. Guarded: requires an authenticated session. |
 
@@ -182,15 +183,25 @@ optional top navbar.
 
 ## Authentication
 
-1. User submits the login or register form.
-2. The page POSTs **JSON** `{ "username", "password" }` to
-   `POST /auth/login` or `POST /auth/register` (credentials are never put in
-   the URL).
-3. On success the API returns `{ token, user }`; the page stores the token via
-   `setToken()` and calls `refreshUser()` to hydrate the `AuthProvider`.
-4. Protected fetches use `authFetch(...)` or add
+1. **Register** (`app/register/page.tsx`) POSTs `{ "username", "email", "password" }`
+   to `POST /auth/register`. The API does **not** return a token — the account
+   starts unverified, so the page shows a “check your inbox” view (with a resend
+   option). Login stays blocked until the email link is clicked.
+2. **Login** (`app/login/page.tsx`) POSTs `{ "username", "password" }` to
+   `POST /auth/login`. On success the API returns `{ token, user }`; the page
+   stores the token via `setToken()` and calls `refreshUser()`. A **`403`**
+   response means the email isn’t verified yet — the page offers an inline
+   resend form.
+3. **Google sign-in** — when `GET /auth/config` reports `google_enabled`, the
+   login page renders a “Continue with Google” button that sends the user to
+   `{API_URL}/auth/google/login?next={origin}`. Google redirects back to
+   `<origin>/login?token=<jwt>`, which the page picks up, stores, and continues
+   from.
+4. **Verified redirect** — clicking a verification email lands on
+   `/login?verified=1`, which toasts success so the user can sign in.
+5. Protected fetches use `authFetch(...)` or add
    `Authorization: Bearer <token>` manually.
-5. On a `401` from a protected call the UI clears the session and redirects to
+6. On a `401` from a protected call the UI clears the session and redirects to
    `/login` with a “Session expired” toast.
 
 ---
@@ -200,15 +211,19 @@ optional top navbar.
 On the home page (`app/page.tsx`):
 
 1. The user picks a `.pdf` file (validated client-side for extension).
-2. `POST /upload` is called with `multipart/form-data` (field `file`) and the
-   bearer token.
-3. The backend returns `{ id, filename, status: "processing" }` **immediately**.
-4. The page starts **polling** `GET /status/{id}` (with the token) every
+2. Optionally unchecks **“Count QR scans”** (a per-document toggle, default on)
+   to disable scan tracking for that upload. When on, the generated QR encodes a
+   `/track/{id}` link that counts scans before redirecting; when off, it points
+   straight at the PDF.
+3. `POST /upload` is called with `multipart/form-data` (fields `file` and
+   `tracking`) and the bearer token.
+4. The backend returns `{ id, filename, status: "processing" }` **immediately**.
+5. The page starts **polling** `GET /status/{id}` (with the token) every
    `POLL_INTERVAL_MS` (4 s) for up to `MAX_POLL_MINUTES` (11 min).
    - `live` → render the QR code (`qr_code_base64`) + the PDF URL.
    - `failed` → show the error message and stop.
    - `401` → session expired; redirect to login.
-5. The same document can be revisited later from the dashboard or
+6. The same document can be revisited later from the dashboard or
    `/documents/[id]`, which re-fetches the status (and regenerates the QR on the
    detail page).
 
@@ -262,6 +277,13 @@ on the backend must include the frontend origin).
 
 - **Public PDFs**: uploaded PDFs are served from public GitHub Pages repos —
   anyone with the URL/QR can view them. Don’t upload sensitive documents.
+- **Scan tracking**: the QR counts scans via a `/track/{id}` redirect and is
+  capped by an admin-configured max (see `../backend/README.md`). Untracked
+  documents skip the counter entirely.
+- **Planned: optional S3/MinIO storage backend** — a global install-time
+  choice to publish PDFs to an S3-compatible bucket instead of GitHub Pages.
+  This upload page is storage-agnostic (it renders `pdf_url`), so no frontend
+  changes are needed; the QR/URL just points at the bucket's public URL.
 - **Max 20 MB uploads** (enforced by the backend).
 - **No refresh tokens** — the JWT expires after 72 hours; users sign in again.
 - **Publishing takes ~20 s to a few minutes** — the UI communicates this via

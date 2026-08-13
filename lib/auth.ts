@@ -5,6 +5,9 @@ const TOKEN_KEY = "pdfqr_token";
 export interface AuthUser {
   id: string;
   username: string;
+  email?: string | null;
+  email_verified?: boolean;
+  auth_provider?: string;
 }
 
 export function getToken(): string | null {

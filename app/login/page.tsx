@@ -17,15 +17,57 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleEnabled, setGoogleEnabled] = useState(false);
+  const [showResend, setShowResend] = useState(false);
+  const [resendEmail, setResendEmail] = useState("");
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) router.replace("/");
   }, [authLoading, user, router]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    const oauthToken = params.get("token");
+    if (oauthToken) {
+      setToken(oauthToken);
+      const cleanUrl = window.location.pathname + window.location.search.replace(/[?&]token=[^&]*/, "").replace(/^[?&]/, "");
+      window.history.replaceState({}, "", cleanUrl || "/");
+      refreshUser().then(() => {
+        toast("Signed in with Google!", "success");
+        router.replace("/");
+      });
+      return;
+    }
+
+    if (params.get("verified") === "1") {
+      toast("Email verified. Sign in to continue.", "success");
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (params.get("verified") === "0") {
+      toast("Verification link is invalid or expired. Request a new one.", "error");
+      window.history.replaceState({}, "", window.location.pathname);
+    } else if (params.get("google_error")) {
+      toast("Google sign-in failed. Please try again.", "error");
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+
+    apiRequest<{ google_enabled: boolean }>("/auth/config", { auth: false })
+      .then((cfg) => setGoogleEnabled(cfg.google_enabled))
+      .catch(() => {});
+  }, [router, refreshUser, toast]);
+
+  function startGoogleLogin() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const next = encodeURIComponent(window.location.origin);
+    window.location.href = `${apiBase}/auth/google/login?next=${next}`;
+  }
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
+    setShowResend(false);
     try {
       const data = await apiRequest<{ token: string }>("/auth/login", {
         method: "POST",
@@ -39,7 +81,28 @@ export default function LoginPage() {
     } catch (err: any) {
       setError(err.message);
       toast(err.message, "error");
+      if (err.status === 403) setShowResend(true);
       setBusy(false);
+    }
+  }
+
+  async function handleResend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resendEmail.trim()) return;
+    setResending(true);
+    try {
+      await apiRequest("/auth/resend-verification", {
+        method: "POST",
+        body: { email: resendEmail.trim() },
+        auth: false,
+      });
+      setShowResend(false);
+      setError(null);
+      toast("If that email is unverified, a new link was sent.", "success");
+    } catch (err: any) {
+      toast(err.message, "error");
+    } finally {
+      setResending(false);
     }
   }
 
@@ -67,6 +130,30 @@ export default function LoginPage() {
           <h1 className="text-lg font-medium text-ink/80">Welcome back</h1>
           <p className="text-sm text-faint mt-1">Sign in to continue.</p>
         </div>
+
+        {googleEnabled && (
+          <>
+            <button
+              type="button"
+              onClick={startGoogleLogin}
+              className="w-full inline-flex items-center justify-center gap-3 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink hover:bg-brand-50 dark:hover:bg-brand-700 transition-colors"
+            >
+              <svg className="w-5 h-5" viewBox="0 0 48 48">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className="flex items-center gap-3 my-6">
+              <div className="h-px flex-1 bg-line" />
+              <span className="text-xs text-faint">or</span>
+              <div className="h-px flex-1 bg-line" />
+            </div>
+          </>
+        )}
 
         <form onSubmit={handleLogin} className="card p-8 space-y-5">
           <div>
@@ -114,6 +201,38 @@ export default function LoginPage() {
               </button>
             </div>
           </div>
+
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-faint hover:text-accent transition-colors">
+              Forgot password?
+            </Link>
+          </div>
+
+          {showResend && (
+            <form onSubmit={handleResend} className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl space-y-2">
+              <p className="text-xs text-amber-700 dark:text-amber-400">
+                Enter the email you registered with to receive a new verification link.
+              </p>
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  className="input-field py-1.5 text-xs flex-1"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={resending || !resendEmail.trim()}
+                  className="btn-secondary py-1.5 text-xs disabled:opacity-50"
+                >
+                  {resending ? "Sending…" : "Resend"}
+                </button>
+              </div>
+            </form>
+          )}
+
           {error && (
             <div className="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-xl animate-shake">
               <p className="text-xs text-red-600 dark:text-red-400 text-center">{error}</p>

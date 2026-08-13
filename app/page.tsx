@@ -44,6 +44,7 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [copied, setCopied] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [tracking, setTracking] = useState(true);
   const pollStart = useRef<number>(0);
   const pollTimeout = useRef<ReturnType<typeof setTimeout>>();
   const failureCount = useRef(0);
@@ -111,6 +112,7 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("tracking", tracking ? "true" : "false");
 
     try {
       const data = await apiRequest<{ id: string }>("/upload", {
@@ -211,6 +213,20 @@ export default function Home() {
               className="hidden"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             />
+          </label>
+
+          <label className="flex items-center justify-center gap-2 mt-4 text-sm text-muted select-none cursor-pointer">
+            <input
+              type="checkbox"
+              checked={tracking}
+              disabled={loading}
+              onChange={(e) => setTracking(e.target.checked)}
+              className="accent-accent disabled:opacity-50"
+            />
+            <span>
+              Count QR scans
+              <span className="text-xs text-faint ml-1.5">track how many times the QR is opened</span>
+            </span>
           </label>
 
           <button
