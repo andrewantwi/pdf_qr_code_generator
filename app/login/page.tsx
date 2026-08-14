@@ -157,11 +157,11 @@ export default function LoginPage() {
 
         <form onSubmit={handleLogin} className="card p-8 space-y-5">
           <div>
-            <label htmlFor="username" className="text-xs font-medium text-muted mb-1.5 block">Username</label>
+            <label htmlFor="username" className="text-xs font-medium text-muted mb-1.5 block">Username or email</label>
             <input
               id="username"
               type="text"
-              placeholder="Your username"
+              placeholder="Username or email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="input-field"
