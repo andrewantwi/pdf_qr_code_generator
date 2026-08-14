@@ -4,12 +4,15 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useRequireAuth } from "@/lib/useRequireAuth";
+import LoadingSpinner from "@/lib/LoadingSpinner";
 import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_POLL_MINUTES = 11;
 const MAX_CONSECUTIVE_FAILURES = 5;
+const MAX_FILE_SIZE_MB = 20;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 interface StatusResult {
   id: string;
@@ -48,6 +51,20 @@ export default function Home() {
   const pollStart = useRef<number>(0);
   const pollTimeout = useRef<ReturnType<typeof setTimeout>>();
   const failureCount = useRef(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function selectFile(f: File | null) {
+    if (!f) return;
+    if (f.type !== "application/pdf") {
+      toast("Please choose a PDF file.", "error");
+      return;
+    }
+    if (f.size > MAX_FILE_SIZE) {
+      toast(`File is too large. Maximum size is ${MAX_FILE_SIZE_MB} MB.`, "error");
+      return;
+    }
+    setFile(f);
+  }
 
   useEffect(() => {
     return () => {
@@ -143,15 +160,7 @@ export default function Home() {
 
   if (authLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3 animate-fade-in">
-          <svg className="animate-spin h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-sm text-faint animate-pulse">Loading…</p>
-        </div>
-      </main>
+      <LoadingSpinner />
     );
   }
 
@@ -172,16 +181,22 @@ export default function Home() {
         <div className="card p-8 md:p-10 animate-slide-up">
           <label
             htmlFor="pdf-upload"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                fileInputRef.current?.click();
+              }
+            }}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
             onDrop={(e) => {
               e.preventDefault();
               setDragging(false);
-              const f = e.dataTransfer.files[0];
-              if (f && f.type === "application/pdf") setFile(f);
-              else toast("Please drop a PDF file.", "error");
+              selectFile(e.dataTransfer.files[0]);
             }}
-            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl py-14 px-4 cursor-pointer transition-[border-color,background-color,transform] duration-200 ease-out-quart ${
+            className={`flex flex-col items-center justify-center border-2 border-dashed rounded-2xl py-14 px-4 cursor-pointer transition-[border-color,background-color,transform] duration-200 ease-out-quart focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 ${
               dragging
                 ? "border-accent bg-accent-soft scale-[1.01]"
                 : file
@@ -204,14 +219,18 @@ export default function Home() {
                 {(file.size / 1024 / 1024).toFixed(1)} MB
               </span>
             ) : (
-              <span className="text-xs text-faint mt-1.5">PDF only · up to your plan limit</span>
+              <span className="text-xs text-faint mt-1.5">PDF only · up to 20 MB</span>
             )}
             <input
+              ref={fileInputRef}
               id="pdf-upload"
               type="file"
               accept="application/pdf"
-              className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="sr-only"
+              onChange={(e) => {
+                selectFile(e.target.files?.[0] ?? null);
+                e.target.value = "";
+              }}
             />
           </label>
 
@@ -248,7 +267,7 @@ export default function Home() {
           </button>
 
           {loading && (
-            <div className="mt-6 space-y-2.5 animate-fade-in">
+            <div className="mt-6 space-y-2.5 animate-fade-in" aria-live="polite">
               <div className="w-full h-2 bg-accent-soft rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-[width] duration-700 ease-out-quint animate-progress-shimmer"

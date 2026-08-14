@@ -93,7 +93,7 @@ export default function Sidebar() {
         ref={panelRef}
         id="app-sidebar"
         aria-label="Sidebar"
-        className={`fixed inset-y-0 left-0 z-50 flex w-[15.5rem] flex-col bg-surface border-r border-line transition-transform duration-250 ease-out-quart md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-[15.5rem] flex-col bg-surface border-r border-line transition-transform duration-300 ease-out-quart md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >

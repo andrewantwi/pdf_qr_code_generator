@@ -1,60 +1,64 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
-
 @layer base {
-  /* Light: sage palette */
+  /* Light: bright, airy emerald/sage */
   :root {
-    --brand-50: 243 241 234;
-    --brand-100: 218 215 205;
-    --brand-200: 197 205 184;
-    --brand-300: 163 177 138;
-    --brand-400: 88 129 87;
-    --brand-500: 58 90 64;
-    --brand-600: 52 78 65;
-    --brand-700: 44 64 54;
-    --brand-800: 36 53 44;
-    --brand-900: 26 39 32;
-    --brand-DEFAULT: 88 129 87;
+    color-scheme: light;
 
-    --accent: 88 129 87;
-    --accent-fg: 243 241 234;
-    --accent-soft: 229 227 214;
+    --brand-50: 236 249 240;
+    --brand-100: 217 241 227;
+    --brand-200: 181 227 201;
+    --brand-300: 133 207 168;
+    --brand-400: 74 185 128;
+    --brand-500: 34 158 96;
+    --brand-600: 23 129 78;
+    --brand-700: 20 103 64;
+    --brand-800: 18 82 52;
+    --brand-900: 14 68 44;
+    --brand-DEFAULT: 34 158 96;
 
-    --canvas: 218 215 205;
-    --surface: 243 241 234;
-    --line: 197 205 184;
-    --ink: 52 78 65;
-    --muted: 58 90 64;
-    --faint: 120 138 110;
+    --accent: 34 158 96;
+    --accent-fg: 255 255 255;
+    --accent-soft: 224 245 232;
+
+    --canvas: 247 250 246;
+    --surface: 255 255 252;
+    --line: 215 226 208;
+    --ink: 18 46 30;
+    --muted: 52 92 66;
+    --faint: 115 138 122;
   }
 
-  /* Dark: deep sage neutrals + one sage accent */
+  /* Dark: deep green-black with a bright emerald accent */
   .dark {
-    --brand-50: 232 230 222;
-    --brand-100: 196 200 186;
-    --brand-200: 140 152 128;
-    --brand-300: 100 118 96;
-    --brand-400: 74 90 72;
-    --brand-500: 52 66 52;
-    --brand-600: 36 48 38;
-    --brand-700: 24 34 28;
-    --brand-800: 14 20 16;
-    --brand-900: 8 12 10;
-    --brand-DEFAULT: 163 177 138;
+    color-scheme: dark;
 
-    --accent: 163 177 138;
-    --accent-fg: 8 12 10;
-    --accent-soft: 20 30 24;
+    --brand-50: 230 245 235;
+    --brand-100: 202 232 212;
+    --brand-200: 160 216 180;
+    --brand-300: 110 195 148;
+    --brand-400: 70 170 118;
+    --brand-500: 48 140 94;
+    --brand-600: 34 110 74;
+    --brand-700: 26 86 58;
+    --brand-800: 18 62 42;
+    --brand-900: 12 46 32;
+    --brand-DEFAULT: 74 222 150;
 
-    --canvas: 8 12 10;
-    --surface: 14 20 16;
-    --line: 32 44 36;
-    --ink: 232 230 222;
-    --muted: 140 152 128;
-    --faint: 90 104 88;
+    --accent: 74 222 150;
+    --accent-fg: 7 20 13;
+    --accent-soft: 20 42 28;
+
+    --canvas: 8 14 11;
+    --surface: 16 26 19;
+    --line: 42 58 48;
+    --ink: 233 239 230;
+    --muted: 152 168 152;
+    --faint: 102 120 108;
   }
 
   html {
@@ -70,31 +74,35 @@
 
 @layer components {
   .btn-primary {
-    @apply w-full inline-flex items-center justify-center rounded-xl py-3 px-4 text-sm font-semibold
+    @apply inline-flex items-center justify-center rounded-xl py-3 px-4 text-sm font-semibold
            bg-accent text-accent-fg hover:opacity-90
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas
            disabled:opacity-40 disabled:cursor-not-allowed
            transition-[transform,opacity] duration-150 ease-out-quart
            active:scale-[0.97] select-none;
   }
 
   .btn-secondary {
-    @apply flex-1 border border-line rounded-xl py-3 text-sm font-medium
+    @apply border border-line rounded-xl py-3 px-4 text-sm font-medium
            text-ink hover:bg-brand-50 dark:hover:bg-brand-700
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40
            transition-[transform,background-color,border-color] duration-150 ease-out-quart
            active:scale-[0.97] select-none;
   }
 
   .btn-danger {
-    @apply w-full inline-flex items-center justify-center bg-red-600 text-white rounded-xl py-3 px-4 text-sm font-semibold
-           hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed
+    @apply inline-flex items-center justify-center bg-red-600 text-white rounded-xl py-3 px-4 text-sm font-semibold
+           hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-canvas
+           disabled:opacity-40 disabled:cursor-not-allowed
            transition-[transform,background-color] duration-150 ease-out-quart
            active:scale-[0.97] select-none;
   }
 
   .btn-danger-secondary {
-    @apply flex-1 border border-line rounded-xl py-3 text-sm font-medium
+    @apply border border-line rounded-xl py-3 px-4 text-sm font-medium
            hover:bg-red-50 dark:hover:bg-red-900/30
            text-red-600 dark:text-red-400
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/40
            transition-[transform,background-color,border-color] duration-150 ease-out-quart
            active:scale-[0.97] select-none;
   }

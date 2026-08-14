@@ -209,12 +209,14 @@ export default function LoginPage() {
           </div>
 
           {showResend && (
-            <form onSubmit={handleResend} className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl space-y-2">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl space-y-2">
               <p className="text-xs text-amber-700 dark:text-amber-400">
                 Enter the email you registered with to receive a new verification link.
               </p>
               <div className="flex gap-2">
+                <label htmlFor="resend-email" className="sr-only">Email address</label>
                 <input
+                  id="resend-email"
                   type="email"
                   placeholder="you@example.com"
                   value={resendEmail}
@@ -223,14 +225,15 @@ export default function LoginPage() {
                   required
                 />
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleResend}
                   disabled={resending || !resendEmail.trim()}
                   className="btn-secondary py-1.5 text-xs disabled:opacity-50"
                 >
                   {resending ? "Sending…" : "Resend"}
                 </button>
               </div>
-            </form>
+            </div>
           )}
 
           {error && (

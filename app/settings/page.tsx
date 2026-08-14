@@ -1,24 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRequireAuth } from "@/lib/useRequireAuth";
+import LoadingSpinner from "@/lib/LoadingSpinner";
 import { apiRequest, isApiUnauthorized } from "@/lib/api";
 import { useToast } from "@/lib/Toast";
+import ConfirmModal from "@/lib/ConfirmModal";
 
 export default function Settings() {
   const { user, loading: authLoading, refreshUser, logout } = useRequireAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [editing, setEditing] = useState(false);
-  const [username, setUsername] = useState(user?.username || "");
+  const [username, setUsername] = useState("");
   const [saving, setSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+
+  useEffect(() => {
+    if (user) setUsername(user.username || "");
+  }, [user]);
 
   async function handleSaveUsername() {
     if (!username.trim()) return;
@@ -54,6 +61,10 @@ export default function Settings() {
       toast("Password must be at least 4 characters", "error");
       return;
     }
+    if (newPassword !== confirmPassword) {
+      toast("New passwords do not match", "error");
+      return;
+    }
     setSavingPassword(true);
     try {
       await apiRequest("/auth/password", {
@@ -62,6 +73,7 @@ export default function Settings() {
       });
       setCurrentPassword("");
       setNewPassword("");
+      setConfirmPassword("");
       toast("Password updated", "success");
     } catch (err: any) {
       if (isApiUnauthorized(err)) {
@@ -93,15 +105,7 @@ export default function Settings() {
 
   if (authLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-4">
-        <div className="flex flex-col items-center gap-3 animate-fade-in">
-          <svg className="animate-spin h-6 w-6 text-accent" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-          </svg>
-          <p className="text-sm text-faint animate-pulse">Loading…</p>
-        </div>
-      </main>
+      <LoadingSpinner />
     );
   }
 
@@ -124,13 +128,23 @@ export default function Settings() {
               </div>
               <div className="min-w-0 flex-1">
                 {editing ? (
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="input-field py-2 px-3 text-sm w-full"
-                    autoFocus
-                  />
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      handleSaveUsername();
+                    }}
+                    className="w-full"
+                  >
+                    <label htmlFor="edit-username" className="sr-only">Username</label>
+                    <input
+                      id="edit-username"
+                      type="text"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="input-field py-2 px-3 text-sm w-full"
+                      autoFocus
+                    />
+                  </form>
                 ) : (
                   <>
                     <p className="text-sm font-semibold text-ink truncate">{user?.username}</p>
@@ -169,22 +183,15 @@ export default function Settings() {
                   <button
                     onClick={handleSaveUsername}
                     disabled={saving || !username.trim() || username === user?.username}
-                    className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-semibold
-                             bg-accent text-accent-fg hover:opacity-90
-                             disabled:opacity-40 disabled:cursor-not-allowed
-                             transition-[transform,opacity] duration-150 ease-out-quart
-                             active:scale-[0.97] select-none"
+                    className="btn-primary !py-2 !px-4 text-xs"
                   >
                     {saving ? "Saving…" : "Save"}
                   </button>
                 </>
               ) : (
                 <button
-                  onClick={() => setEditing(true)}
-                  className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-semibold
-                           bg-accent text-accent-fg hover:opacity-90
-                           transition-[transform,opacity] duration-150 ease-out-quart
-                           active:scale-[0.97] select-none"
+                  onClick={() => { setUsername(user?.username || ""); setEditing(true); }}
+                  className="btn-primary !py-2 !px-4 text-xs"
                 >
                   Edit profile
                 </button>
@@ -240,14 +247,22 @@ export default function Settings() {
                   minLength={4}
                 />
               </div>
+              <div>
+                <label htmlFor="confirm-password" className="text-xs font-medium text-muted mb-1.5 block">Confirm new password</label>
+                <input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="input-field py-2 text-sm"
+                  placeholder="Re-enter new password"
+                  required
+                />
+              </div>
               <button
                 type="submit"
-                disabled={savingPassword || !currentPassword || !newPassword}
-                className="inline-flex items-center justify-center rounded-xl px-4 py-2 text-xs font-semibold
-                         bg-accent text-accent-fg hover:opacity-90
-                         disabled:opacity-40 disabled:cursor-not-allowed
-                         transition-[transform,opacity] duration-150 ease-out-quart
-                         active:scale-[0.97] select-none"
+                disabled={savingPassword || !currentPassword || !newPassword || newPassword !== confirmPassword}
+                className="btn-primary !py-2 !px-4 text-xs"
               >
                 {savingPassword ? "Updating…" : "Update password"}
               </button>
@@ -308,68 +323,40 @@ export default function Settings() {
         </div>
       </div>
 
-      {confirmDeleteAccount && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-surface rounded-2xl border border-line shadow-2xl overflow-hidden animate-scale-in">
-            <div className="h-1.5 bg-gradient-to-r from-red-600 to-red-500" />
-            <div className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 shrink-0 rounded-full bg-red-100 dark:bg-red-900/30 ring-8 ring-red-50 dark:ring-red-950/40 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                  </svg>
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-ink leading-tight">Delete your account?</h3>
-                  <p className="text-sm text-muted mt-1.5">
-                    This will permanently remove your account and all uploaded documents. There is no way to recover them.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-5 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-dashed border-red-200 dark:border-red-800 p-4 space-y-2">
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-600 dark:text-red-400">This will</p>
-                <ul className="text-xs text-muted space-y-1.5">
-                  <li className="flex items-start gap-2">
-                    <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Erase your account and sign-in credentials
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Delete every document you have uploaded
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                    Remove all generated QR codes
-                  </li>
-                </ul>
-              </div>
-
-              <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => setConfirmDeleteAccount(false)}
-                  className="btn-secondary w-auto flex-1"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deletingAccount}
-                  className="btn-danger flex-1 disabled:opacity-60"
-                >
-                  {deletingAccount ? "Deleting account…" : "Delete account"}
-                </button>
-              </div>
-            </div>
+      <ConfirmModal
+        open={confirmDeleteAccount}
+        onClose={() => setConfirmDeleteAccount(false)}
+        title="Delete your account?"
+        confirmLabel="Delete account"
+        busy={deletingAccount}
+        busyLabel="Deleting account…"
+        onConfirm={handleDeleteAccount}
+        description={
+          <div className="mt-4 rounded-xl bg-red-50/60 dark:bg-red-950/30 border border-dashed border-red-200 dark:border-red-800 p-4 space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-red-600 dark:text-red-400">This will</p>
+            <ul className="text-xs text-muted space-y-1.5">
+              <li className="flex items-start gap-2">
+                <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Erase your account and sign-in credentials
+              </li>
+              <li className="flex items-start gap-2">
+                <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Delete every document you have uploaded
+              </li>
+              <li className="flex items-start gap-2">
+                <svg className="w-3.5 h-3.5 mt-0.5 text-red-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Remove all generated QR codes
+              </li>
+            </ul>
           </div>
-        </div>
-      )}
+        }
+      />
     </main>
   );
 }

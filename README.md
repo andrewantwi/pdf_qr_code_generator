@@ -235,10 +235,10 @@ All design tokens live in `tailwind.config.js`:
 
 - **Dark mode**: `class` strategy; `ThemeProvider` toggles the `dark` class on
   `<html>`.
-- **Brand palette**: a slate/steel-blue family (`brand-50` → `brand-900`) plus
-  grayscale ramps (`charcoal_blue`, `stone_gray`, `jet_gray`, `jet_black`,
-  `deep_jet`, `carbon_black`, `ink_black`, `onyx`, `near_black`, `pure_black`).
-- **Typography**: Inter (fallback `system-ui`).
+- **Brand palette**: an emerald family (`brand-50` → `brand-900`) plus semantic
+  tokens `canvas`, `surface`, `line`, `ink`, `muted`, `faint`, and `accent`
+  (`accent`, `accent-fg`, `accent-soft`).
+- **Typography**: Outfit (fallback `system-ui`).
 - **Motion**: custom keyframes/animations — `fade-in`, `slide-up`,
   `progress-shimmer`, `scale-in`, `shake` — with `out-quart` / `out-quint` /
   `out-expo` easing utilities.
