@@ -53,15 +53,27 @@ frontend/
 │   ├── page.tsx             # Home: upload + live progress + QR result
 │   ├── login/page.tsx       # Sign-in page
 │   ├── register/page.tsx    # Create-account page
+│   ├── forgot-password/page.tsx # Request a password reset link
 │   ├── dashboard/page.tsx   # List / delete past uploads
-│   └── documents/[id]/page.tsx  # Detail page: status, PDF link, QR
+│   ├── documents/[id]/page.tsx  # Detail page: status, PDF link, QR
+│   ├── settings/page.tsx    # Edit profile, change password, delete account
+│   ├── loading.tsx          # Route-transition loading boundary
+│   ├── error.tsx            # Runtime error boundary
+│   ├── not-found.tsx        # 404 page
+│   └── ThemeToggle.tsx      # Dark/light toggle control
 ├── lib/
 │   ├── auth.ts              # Token storage + fetchUser + authFetch helpers
 │   ├── AuthProvider.tsx     # Auth context (user, loading, refreshUser, logout)
+│   ├── useRequireAuth.ts    # Redirect unauthenticated users to /login
+│   ├── api.ts               # apiRequest helper (JWT fetch wrapper)
 │   ├── Toast.tsx            # Toast notification provider
-│   ├── ThemeProvider.tsx    # Dark/light theme context
+│   ├── ThemeProvider.tsx    # Dark/light theme context (follows system)
 │   ├── Sidebar.tsx          # Persistent navigation sidebar
-│   └── Navbar.tsx           # Top navigation bar
+│   ├── Providers.tsx        # Theme + Auth + Toast + Sidebar composition
+│   ├── ConfirmModal.tsx     # Accessible confirm dialog (delete flows)
+│   ├── LoadingSpinner.tsx   # Full-screen loading spinner
+│   ├── SkeletonCards.tsx    # Skeleton placeholder cards
+│   └── PageHeader.tsx       # Page title/subtitle header
 ├── tailwind.config.js       # Design tokens (colors, animations)
 ├── next.config.js
 ├── tsconfig.json
@@ -77,7 +89,8 @@ frontend/
 - **`lib/`**: framework-agnostic client utilities and providers, imported with
   the `@/lib/...` path alias (see `tsconfig.json`).
 - **Auth + theme providers** wrap the whole app in `app/layout.tsx`, with a
-  persistent `Sidebar` on the left (`md:ml-56` offsets content).
+  persistent `Sidebar` on the left (`md:ml-[15.5rem]` offsets content on the
+  authenticated routes).
 
 ---
 
@@ -173,11 +186,16 @@ React context providing `{ user, loading, refreshUser, logout }`:
 
 ### `lib/ThemeProvider.tsx`
 Dark/light theme context (class-based `dark` mode, persisted per user
-preference).
+preference, falls back to the OS setting when no preference is stored).
 
-### `lib/Sidebar.tsx` / `lib/Navbar.tsx`
-Persistent navigation: sidebar (brand, nav links, user menu, logout) and an
-optional top navbar.
+### `lib/Sidebar.tsx` / `lib/Providers.tsx`
+Persistent sidebar (brand, nav links, user menu, logout) composed with the
+theme/auth/toast providers; hidden on the public routes (`/login`, `/register`,
+`/forgot-password`).
+
+### Shared UI (`lib/ConfirmModal.tsx`, `LoadingSpinner.tsx`, `SkeletonCards.tsx`, `PageHeader.tsx`)
+Reusable accessible pieces: a focus-trapped confirm dialog for delete flows, a
+full-screen auth spinner, table/skeleton placeholders, and the page header.
 
 ---
 
@@ -188,7 +206,8 @@ optional top navbar.
    starts unverified, so the page shows a “check your inbox” view (with a resend
    option). Login stays blocked until the email link is clicked.
 2. **Login** (`app/login/page.tsx`) POSTs `{ "username", "password" }` to
-   `POST /auth/login`. On success the API returns `{ token, user }`; the page
+   `POST /auth/login` — `username` accepts the **username or email**. On success
+   the API returns `{ token, user }`; the page
    stores the token via `setToken()` and calls `refreshUser()`. A **`403`**
    response means the email isn’t verified yet — the page offers an inline
    resend form.
@@ -210,7 +229,8 @@ optional top navbar.
 
 On the home page (`app/page.tsx`):
 
-1. The user picks a `.pdf` file (validated client-side for extension).
+1. The user picks a `.pdf` file (validated client-side: PDF type and a 20 MB
+   size cap, mirroring the backend's limits).
 2. Optionally unchecks **“Count QR scans”** (a per-document toggle, default on)
    to disable scan tracking for that upload. When on, the generated QR encodes a
    `/track/{id}` link that counts scans before redirecting; when off, it points
