@@ -20,34 +20,11 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string | null>(null);
-  const [verificationUrl, setVerificationUrl] = useState<string | null>(null);
-  const [emailStatus, setEmailStatus] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
     if (!authLoading && user) router.push("/");
   }, [authLoading, user, router]);
-
-  useEffect(() => {
-    const savedEmail = sessionStorage.getItem("registered_email");
-    const savedUrl = sessionStorage.getItem("verification_url");
-    const savedStatus = sessionStorage.getItem("email_status");
-    if (savedEmail) {
-      setRegisteredEmail(savedEmail);
-      setVerificationUrl(savedUrl);
-      setEmailStatus(savedStatus);
-    }
-  }, []);
-
-  function persistRegistered(email: string, url: string | null, status: string) {
-    sessionStorage.setItem("registered_email", email);
-    sessionStorage.setItem("email_status", status);
-    if (url) sessionStorage.setItem("verification_url", url);
-    else sessionStorage.removeItem("verification_url");
-    setRegisteredEmail(email);
-    setVerificationUrl(url);
-    setEmailStatus(status);
-  }
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
@@ -58,12 +35,12 @@ export default function RegisterPage() {
     setBusy(true);
     setError(null);
     try {
-      const data = await apiRequest<{ detail: string; email_status?: string; verification_url?: string | null }>("/auth/register", {
+      await apiRequest<{ detail: string }>("/auth/register", {
         method: "POST",
         body: { username, email, password },
         auth: false,
       });
-      persistRegistered(email, data.verification_url ?? null, data.email_status ?? "delivered");
+      setRegisteredEmail(email);
       toast("Account created! Verify your email to sign in.", "success");
     } catch (err: any) {
       setError(err.message);
@@ -77,22 +54,12 @@ export default function RegisterPage() {
     if (!registeredEmail) return;
     setResending(true);
     try {
-      const data = await apiRequest<{ email_status?: string; verification_url?: string | null }>("/auth/resend-verification", {
+      await apiRequest("/auth/resend-verification", {
         method: "POST",
         body: { email: registeredEmail },
         auth: false,
       });
-      if (data.verification_url) {
-        setVerificationUrl(data.verification_url);
-        sessionStorage.setItem("verification_url", data.verification_url);
-      }
-      if (data.email_status) {
-        setEmailStatus(data.email_status);
-        sessionStorage.setItem("email_status", data.email_status);
-      }
-      if (data.email_status === "failed")
-        toast("Could not send the email (SMTP error). Use the link below to verify.", "error");
-      else toast("Verification link sent. Check your inbox.", "success");
+      toast("Verification link sent. Check your inbox.", "success");
     } catch (err: any) {
       toast(err.message, "error");
     } finally {
@@ -130,21 +97,6 @@ export default function RegisterPage() {
               <span className="text-accent font-medium">{registeredEmail}</span>. Click it to
               verify your email, then sign in.
             </p>
-            {verificationUrl && (
-              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl text-left">
-                <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1">
-                  {emailStatus === "failed"
-                    ? "Couldn't send the email (SMTP error) — use this link"
-                    : "Email service not configured — dev link"}
-                </p>
-                <a
-                  href={verificationUrl}
-                  className="text-xs text-accent break-all underline hover:opacity-80"
-                >
-                  {verificationUrl}
-                </a>
-              </div>
-            )}
             <button
               onClick={handleResend}
               disabled={resending}
@@ -152,16 +104,8 @@ export default function RegisterPage() {
             >
               {resending ? "Sending…" : "Resend verification link"}
             </button>
-            <Link
-              href="/login"
-              onClick={() => {
-                sessionStorage.removeItem("registered_email");
-                sessionStorage.removeItem("verification_url");
-                sessionStorage.removeItem("email_status");
-              }}
-              className="block text-center mt-4 text-xs text-faint hover:text-accent transition-colors"
-            >
-              Back to sign in →
+            <Link href="/login" className="btn-primary w-full mt-3 text-center">
+              Go to login
             </Link>
           </div>
         </div>
