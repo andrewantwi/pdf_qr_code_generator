@@ -12,24 +12,15 @@ interface ThemeContextType {
 const STORAGE_KEY = "pdfqr_theme";
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "dark",
+  theme: "light",
   toggle: () => {},
 });
 
-function getSystemTheme(): Theme {
-  if (typeof window !== "undefined" && window.matchMedia) {
-    return window.matchMedia("(prefers-color-scheme: light)").matches
-      ? "light"
-      : "dark";
-  }
-  return "dark";
-}
-
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "light";
   const stored = localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark") return stored;
-  return getSystemTheme();
+  return "light";
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -39,16 +30,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
-
-  // Follow the OS theme while the user has no explicit preference stored.
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") return;
-    const mq = window.matchMedia("(prefers-color-scheme: light)");
-    const onChange = () => setTheme(mq.matches ? "light" : "dark");
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
 
   const toggle = useCallback(() => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
